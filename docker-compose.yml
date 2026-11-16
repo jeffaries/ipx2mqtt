@@ -6,26 +6,14 @@
 services:
   ipx2mqtt:
     build: .
+    pull_policy: build
     image: ipx2mqtt:latest
     container_name: ipx2mqtt
     restart: unless-stopped
-    depends_on:
-      - mosquitto
     volumes:
       # Toute la configuration : ./config/config.yml (MQTT, IPX, appareil) et ./config/entities.yml (entités, libellés)
-      - ./config:/config:ro
+      - /data/ipx2mqtt:/config:ro
     # ports:
     #   - "8080:8080"   # uniquement si Push.Enabled=true dans config.yml
 
-  mosquitto:
-    image: eclipse-mosquitto:2
-    container_name: mosquitto
-    restart: unless-stopped
-    ports:
-      - "1883:1883"
-    volumes:
-      - ./docker/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
-      - mosquitto-data:/mosquitto/data
-
-volumes:
-  mosquitto-data:
+ 
