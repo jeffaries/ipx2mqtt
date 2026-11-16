@@ -193,6 +193,7 @@ Entities:
 |---|---|
 | `Key` | Module code `<module>.<channel>` (`01-IPX.03`, `04-8R.05`, `06-DM.01`…), i.e. the IPX object name `[04-8R]Relay cmd 5`; or the **numeric `_id` of the command object** (`"65536"`), which does not depend on object names and wins over the module code |
 | `Name` | Name shown in Home Assistant (default: generic, e.g. "03-8R relais 3") |
+| `Area` | Room (`Cuisine`). Home Assistant has no per-entity area in MQTT discovery, only per device: entities of a same area are published as one device `IPX800 V5 - <area>` (with `sa`, linked to the main device through `via_device`). Without `Area` the entity stays on the main device. Also valid on hand-declared entities. The area is only *suggested* when the device is created; later changes must also be made in Home Assistant |
 | `Component` | `switch` or `light`. Default: `switch` for a relay, `light` for a dimmer |
 | `Dimmable` | `light` only. `true` (default) = on/off + brightness slider (dimmers only); `false` = on/off light. A relay shown as a light is always on/off |
 

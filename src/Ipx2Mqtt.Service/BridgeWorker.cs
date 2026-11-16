@@ -98,6 +98,7 @@ public sealed class BridgeWorker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
         _discovery.HomeAssistantOnline = token => _states.RepublishAllAsync(token);
+        _discovery.StaleTopicPrefix = _discoveryBuilder.AreaTopicPrefix(_device.NodeId);
         await _discovery.StartAsync(ct).ConfigureAwait(false);
         foreach (var topic in _registry.Commands.Keys)
         {
@@ -196,8 +197,8 @@ public sealed class BridgeWorker : BackgroundService
         }
     }
 
-    private DiscoveryMessage BuildDiscovery(string? swVersion) =>
-        _discoveryBuilder.Build(
+    private IReadOnlyList<DiscoveryMessage> BuildDiscovery(string? swVersion) =>
+        _discoveryBuilder.BuildAll(
             _device.NodeId,
             new DeviceInfo(_device.NodeId, _device.Name, _device.Manufacturer, _device.Model, swVersion),
             new OriginInfo("ipx2mqtt", _version),

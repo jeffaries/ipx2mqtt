@@ -40,7 +40,9 @@ public sealed class EntityMapper
                 $"Supported: {string.Join(", ", _mappers.Keys.Order())}.");
         }
 
-        return mapper.Map(definition, _context);
+        var mapped = mapper.Map(definition, _context);
+        mapped.Component.Area = string.IsNullOrWhiteSpace(definition.Area) ? null : definition.Area.Trim();
+        return mapped;
     }
 
     /// <summary>Maps all entities and rejects duplicated keys, unique ids or topics.</summary>

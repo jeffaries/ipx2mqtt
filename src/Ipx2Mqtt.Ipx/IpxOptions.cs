@@ -99,7 +99,7 @@ public sealed class EntitiesOptions
             .GroupBy(e => e.Key!.Trim(), StringComparer.OrdinalIgnoreCase)
             .ToDictionary(
                 g => g.Key,
-                g => new EntityOverride { Name = g.Last().Name, Component = g.Last().Component, Dimmable = g.Last().Dimmable },
+                g => new EntityOverride { Name = g.Last().Name, Component = g.Last().Component, Dimmable = g.Last().Dimmable, Area = g.Last().Area },
                 StringComparer.OrdinalIgnoreCase);
 }
 
@@ -108,6 +108,9 @@ public sealed class EntityOverride
 {
     /// <summary>Display name in Home Assistant.</summary>
     public string? Name { get; set; }
+
+    /// <summary>Room of the entity.</summary>
+    public string? Area { get; set; }
 
     /// <summary>"switch" or "light". Default: switch for relays, light for dimmers (empty = unchanged).</summary>
     public string? Component { get; set; }

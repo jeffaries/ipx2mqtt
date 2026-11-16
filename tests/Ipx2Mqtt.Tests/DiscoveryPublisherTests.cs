@@ -48,6 +48,31 @@ public class DiscoveryPublisherTests
     }
 
     [Fact]
+    public async Task Publish_ClearsRetainedAreaDevicesThatAreNoLongerPublished()
+    {
+        var (publisher, mqtt, _) = Create();
+        publisher.StaleTopicPrefix = "homeassistant/device/ipx800_area_";
+        await publisher.StartAsync(CancellationToken.None);
+        Assert.Contains("homeassistant/device/+/config", mqtt.Subscriptions);
+
+        // retained devices of a previous run, delivered by the broker before and after we publish
+        await mqtt.ReceiveAsync("homeassistant/device/ipx800_area_cuisine/config", "{}");
+        await mqtt.ReceiveAsync("homeassistant/device/ipx800_area_salon/config", "{}");
+        await mqtt.ReceiveAsync("homeassistant/device/other_node/config", "{}");
+        await publisher.PublishAsync(new[]
+        {
+            new DiscoveryMessage("homeassistant/device/ipx800/config", "{}"),
+            new DiscoveryMessage("homeassistant/device/ipx800_area_salon/config", "{}"),
+        });
+        await mqtt.ReceiveAsync("homeassistant/device/ipx800_area_cave/config", "{}");
+
+        var cleared = mqtt.Published.Where(m => m.Payload.Length == 0).Select(m => m.Topic).Order().ToArray();
+        Assert.Equal(
+            new[] { "homeassistant/device/ipx800_area_cave/config", "homeassistant/device/ipx800_area_cuisine/config" },
+            cleared);
+    }
+
+    [Fact]
     public async Task Start_SubscribesToHomeAssistantStatus()
     {
         var (publisher, mqtt, _) = Create();

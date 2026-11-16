@@ -32,6 +32,50 @@ public class DiscoveryBuilderTests
     };
 
     [Fact]
+    public void BuildAll_GroupsComponentsOfAnAreaInTheirOwnDevice()
+    {
+        var components = Components();
+        components[0].Area = "Séjour & Cuisine";
+
+        var messages = new DiscoveryBuilder().BuildAll("ipx800", Device, Origin, "ipx800/status", components);
+
+        Assert.Equal(2, messages.Count);
+        var main = JsonNode.Parse(messages[0].Payload)!;
+        Assert.Equal("homeassistant/device/ipx800/config", messages[0].Topic);
+        Assert.Equal(new[] { "analog_1" }, main["cmps"]!.AsObject().Select(c => c.Key));
+
+        var area = JsonNode.Parse(messages[1].Payload)!;
+        Assert.Equal("homeassistant/device/ipx800_area_sejour_cuisine/config", messages[1].Topic);
+        Assert.Equal("Séjour & Cuisine", (string?)area["dev"]!["sa"]);
+        Assert.Equal("ipx800", (string?)area["dev"]!["via_device"]);
+        Assert.Equal("ipx800_area_sejour_cuisine", (string?)area["dev"]!["ids"]);
+        Assert.Equal("IPX800 V5 - Séjour & Cuisine", (string?)area["dev"]!["name"]);
+        Assert.Equal(new[] { "relay_1" }, area["cmps"]!.AsObject().Select(c => c.Key));
+        Assert.StartsWith(new DiscoveryBuilder().AreaTopicPrefix("ipx800"), messages[1].Topic);
+    }
+
+    [Fact]
+    public void BuildAll_WithoutAreaIsTheSingleMainDevice()
+    {
+        var messages = new DiscoveryBuilder().BuildAll("ipx800", Device, Origin, "s", Components());
+
+        Assert.Equal(new DiscoveryBuilder().Build("ipx800", Device, Origin, "s", Components()), messages.Single());
+    }
+
+    [Fact]
+    public void BuildAll_ClearsTheMainDeviceWhenEveryComponentHasAnArea()
+    {
+        var components = Components();
+        components.ForEach(c => c.Area = "Cave");
+
+        var messages = new DiscoveryBuilder().BuildAll("ipx800", Device, Origin, "s", components);
+
+        Assert.Equal(string.Empty, messages[0].Payload);
+        Assert.Equal("homeassistant/device/ipx800/config", messages[0].Topic);
+        Assert.Equal(2, JsonNode.Parse(messages[1].Payload)!["cmps"]!.AsObject().Count);
+    }
+
+    [Fact]
     public void Build_UsesDeviceDiscoveryTopic()
     {
         var message = new DiscoveryBuilder().Build("ipx800", Device, Origin, "ipx800/status", Components());

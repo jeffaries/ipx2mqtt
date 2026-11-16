@@ -21,6 +21,9 @@ public sealed class EntityDefinition
 
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>Room of the entity ("Cuisine"). Entities of a same area are grouped in one Home Assistant device with that area.</summary>
+    public string? Area { get; set; }
+
     /// <summary>Home Assistant platform: switch, binary_sensor, sensor, light, ...</summary>
     public string Component { get; set; } = string.Empty;
 

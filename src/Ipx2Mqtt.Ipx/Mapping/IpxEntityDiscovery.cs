@@ -68,6 +68,11 @@ public static partial class IpxEntityDiscovery
                 d.Name = o.Name;
             }
 
+            if (!string.IsNullOrWhiteSpace(o.Area))
+            {
+                d.Area = o.Area;
+            }
+
             var component = string.IsNullOrWhiteSpace(o.Component) ? d.Component : o.Component.Trim().ToLowerInvariant();
             if (component is not ("switch" or "light"))
             {

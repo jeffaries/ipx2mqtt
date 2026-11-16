@@ -38,6 +38,8 @@ public sealed partial class DiscoveryBuilder
         AddIfNotEmpty(dev, "mf", device.Manufacturer);
         AddIfNotEmpty(dev, "mdl", device.Model);
         AddIfNotEmpty(dev, "sw", device.SwVersion);
+        AddIfNotEmpty(dev, "sa", device.SuggestedArea);
+        AddIfNotEmpty(dev, "via_device", device.ViaDevice);
 
         var o = new JsonObject { ["name"] = origin.Name };
         AddIfNotEmpty(o, "sw", origin.SwVersion);
@@ -69,6 +71,62 @@ public sealed partial class DiscoveryBuilder
         };
 
         return new DiscoveryMessage(topic, root.ToJsonString(JsonOptions));
+    }
+
+    /// <summary>Node id of the device grouping the entities of an area.</summary>
+    public static string AreaNodeId(string nodeId, string area) => $"{nodeId}_area_{Slug(area)}";
+
+    /// <summary>Topic prefix of the area devices of a node (all their config topics start with it).</summary>
+    public string AreaTopicPrefix(string nodeId) => $"{Prefix}/device/{nodeId}_area_";
+
+    /// <summary>
+    /// Home Assistant has no area on an entity, only on a device. Components without area form the main device (as
+    /// <see cref="Build"/>); the components of each area form their own device, named after the area, with
+    /// <c>sa</c> set and linked to the main one (<c>via_device</c>). The main message is an empty removal when every
+    /// component has an area, so that a previously published main device does not keep the entities.
+    /// </summary>
+    public IReadOnlyList<DiscoveryMessage> BuildAll(
+        string nodeId,
+        DeviceInfo device,
+        OriginInfo origin,
+        string availabilityTopic,
+        IEnumerable<ComponentDescriptor> components)
+    {
+        var all = components.ToList();
+        var main = all.Where(c => string.IsNullOrWhiteSpace(c.Area)).ToList();
+        var areas = all.Where(c => !string.IsNullOrWhiteSpace(c.Area)).GroupBy(c => Slug(c.Area!)).ToList();
+
+        var messages = new List<DiscoveryMessage>
+        {
+            main.Count > 0 || areas.Count == 0
+                ? Build(nodeId, device, origin, availabilityTopic, main.Count > 0 ? main : all)
+                : BuildRemoval(nodeId),
+        };
+
+        foreach (var group in areas)
+        {
+            var area = group.First().Area!.Trim();
+            var areaId = AreaNodeId(nodeId, area);
+            var areaDevice = device with
+            {
+                Id = areaId,
+                Name = $"{device.Name} - {area}",
+                SuggestedArea = area,
+                ViaDevice = device.Id,
+            };
+            messages.Add(Build(areaId, areaDevice, origin, availabilityTopic, group));
+        }
+
+        return messages;
+    }
+
+    private static string Slug(string text)
+    {
+        var chars = text.Normalize(System.Text.NormalizationForm.FormD)
+            .Where(ch => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch) != System.Globalization.UnicodeCategory.NonSpacingMark)
+            .Select(ch => char.IsAsciiLetterOrDigit(ch) ? char.ToLowerInvariant(ch) : '_');
+        var slug = Regex.Replace(new string(chars.ToArray()), "_+", "_").Trim('_');
+        return slug.Length == 0 ? "area" : slug;
     }
 
     /// <summary>Empty retained payload on the config topic removes the device and all its entities.</summary>

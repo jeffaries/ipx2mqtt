@@ -19,6 +19,11 @@
 #              "06-DM.03", "[01-IPX]Relay cmd 1" donne "01-IPX.01". Ou _id numérique de l'objet de commande ("65536"),
 #              indépendant des noms d'objets, prioritaire sur le code module. Mettre la clé entre guillemets.
 #   Name       nom affiché dans Home Assistant (défaut : nom générique, « 03-8R relais 3 »). Renommer ne recrée pas l'entité.
+#   Area       pièce de l'entité ("Cuisine"). Valable aussi pour une entité déclarée à la main (voir plus bas).
+#              Home Assistant n'a pas de pièce par entité dans MQTT Discovery, seulement par appareil : les entités d'une
+#              même pièce sont donc regroupées dans un appareil « IPX800 V5 - <pièce> » (suggested_area, rattaché à l'appareil
+#              principal). Sans Area, l'entité reste dans l'appareil principal. La pièce n'est suggérée qu'à la création de
+#              l'appareil : si vous la changez ensuite, modifiez-la aussi dans Home Assistant.
 #   Component  switch | light. Défaut : switch pour un relais, light pour un variateur.
 #   Dimmable   light uniquement. true (défaut) = lumière variable (on/off + curseur de niveau) ; false = lumière on/off.
 #              Seul un variateur [NN-DM] a un niveau : un relais montré en light est toujours on/off.
@@ -32,7 +37,7 @@
 # Changer Component change la plateforme Home Assistant : l'entité est recréée (nouvel entity_id, historique perdu).
 # ---------------------------------------------------------------------------------------------------------------------
 Entities:
-  - { Key: "01-IPX.01", Name: Lumières Cuisine }                                    # renommer seulement
+  - { Key: "01-IPX.01", Name: Lumières Cuisine, Area: Cuisine }                     # renommer + pièce
   - { Key: "03-8R.02",  Name: Lumières Bureau, Component: light }                   # relais présenté comme lumière on/off
   - { Key: "04-8R.05",  Name: Z3 1er Etage }
   - { Key: "06-DM.01",  Name: Lumières Salle à manger }                             # variateur : light variable

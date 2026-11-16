@@ -161,6 +161,17 @@ public class EntityDiscoveryTests
     }
 
     [Fact]
+    public void Area_FlowsFromOverrideToDiscoveryComponent()
+    {
+        var overrides = new Dictionary<string, EntityOverride> { ["01-IPX.01"] = new() { Area = " Cuisine " } };
+
+        var mapped = Mapper().MapAll(IpxEntityDiscovery.Discover(Inventory(), overrides));
+
+        Assert.Equal("Cuisine", mapped.Single(m => m.Component.Key == "relay_1").Component.Area);
+        Assert.Null(mapped.Single(m => m.Component.Key == "relay_2").Component.Area);
+    }
+
+    [Fact]
     public void Discover_RejectsUnknownOverrideComponent()
     {
         var overrides = new Dictionary<string, EntityOverride> { ["01-IPX.01"] = new() { Component = "fan" } };
