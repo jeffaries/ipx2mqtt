@@ -98,7 +98,8 @@ public sealed class IpxHttpApi
                 {
                     var name = e.TryGetProperty("name", out var n) && n.ValueKind == JsonValueKind.String ? n.GetString() ?? "" : "";
                     var link = e.TryGetProperty("link1", out var l) && l.TryGetInt64(out var lv) ? lv : 0;
-                    objects.Add(new Mapping.IpxListedObject(idValue, name, link, isAna));
+                    var link0 = e.TryGetProperty("link0", out var l0) && l0.TryGetInt64(out var l0v) ? l0v : 0;
+                    objects.Add(new Mapping.IpxListedObject(idValue, name, link, isAna, link0));
                 }
             }
         }

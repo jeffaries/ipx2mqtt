@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 namespace Ipx2Mqtt.Ipx.Mapping;
 
 /// <summary>An io or ana object as listed by <c>/api/core/io|ana</c> (<c>Link1</c> is the owning extension, 0 if none).</summary>
-public sealed record IpxListedObject(long Id, string Name, long Link1, bool IsAna);
+public sealed record IpxListedObject(long Id, string Name, long Link1, bool IsAna, long Link0 = 0);
 
 /// <summary>An extension returned by <c>/api/ebx/&lt;kind&gt;</c>.</summary>
 public sealed record IpxExtension(string Kind, long Id, string Name);
@@ -113,13 +113,17 @@ public static partial class IpxEntityDiscovery
                     var stateWhat = what == "relay cmd" ? "relay state" : "open coll. state";
                     var state = byRole.GetValueOrDefault((tag, stateWhat, n));
                     var board = tag.EndsWith("IPX", StringComparison.OrdinalIgnoreCase);
+                    // A relay of the IPX800 board driven by a teleruptor must be commanded through the output of the teleruptor
+                    // (writing the relay would be undone by the teleruptor logic); the relay stays the source of the state.
+                    // Extension relays (X-8R...) work with a direct command and are left alone.
+                    var teleruptor = what == "relay cmd" && board ? TeleruptorOutputFor(cmd, inventory) : null;
                     result.Add(Adjust(new EntityDefinition
                     {
                         Type = what == "open coll." ? "collector" : board ? "relay" : TypeOf(tag),
                         Index = int.Parse(n),
                         Name = what == "open coll." ? Label(tag, n, cmd.Id, $"Collecteur ouvert {n}") : Label(tag, n, cmd.Id, board ? $"Relais {n}" : $"{tag} relais {n}"),
                         Component = "switch",
-                        CommandId = cmd.Id,
+                        CommandId = teleruptor is not null && state is not null ? teleruptor.Id : cmd.Id,
                         StateId = state?.Id ?? cmd.Id,
                     }, tag, n, cmd.Id));
                     break;
@@ -175,6 +179,21 @@ public static partial class IpxEntityDiscovery
 
         return result;
     }
+
+    [GeneratedRegex(@"^\[T[eé]l[eé]rupteur[^\]]*\]Output$", RegexOptions.IgnoreCase)]
+    private static partial Regex TeleruptorOutputPattern();
+
+    /// <summary>
+    /// The output of the teleruptor wired to this relay command, if any (the last element of the chain before the relay).
+    /// The IPX links objects through shared link ids: the output of a teleruptor ("[Telerupteur 01-IPX.4]Output") has the
+    /// same <c>link1</c> as the <c>link0</c> of the relay command. Writing that output is an absolute command, whatever
+    /// else (buttons, rules) changed the teleruptor in the meantime.
+    /// </summary>
+    private static IpxListedObject? TeleruptorOutputFor(IpxListedObject relayCommand, IpxInventory inventory) =>
+        relayCommand.Link0 == 0
+            ? null
+            : inventory.Objects.FirstOrDefault(o =>
+                !o.IsAna && o.Id != relayCommand.Id && o.Link1 == relayCommand.Link0 && TeleruptorOutputPattern().IsMatch(o.Name));
 
     /// <summary>Entities already declared by hand win: discovered ones using the same IPX ids or the same key are dropped.</summary>
     public static IReadOnlyList<EntityDefinition> Merge(

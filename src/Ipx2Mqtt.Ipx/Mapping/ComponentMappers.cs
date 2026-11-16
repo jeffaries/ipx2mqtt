@@ -36,8 +36,7 @@ internal static class MapperHelpers
         id ?? throw new EntityConfigurationException($"Entity '{d.Name}' ({d.Component}) requires {field}.");
 
     public static CommandBinding OnOffCommand(string topic, long ipxId) =>
-        new(topic, payload => IpxPayloads.TryParseOnOff(payload, out var on) ? new IpxCommand(ipxId, on) : null);
-}
+        new(topic, payload => IpxPayloads.TryParseOnOff(payload, out var on) ? new IpxCommand(ipxId, on) : null);}
 
 /// <summary>Relay-like outputs (IPX relays, X-8R...): state id + command id.</summary>
 public sealed class SwitchMapper : IComponentMapper

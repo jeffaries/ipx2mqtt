@@ -29,7 +29,6 @@ public sealed class EntityDefinition
 
     /// <summary>IPX object id to write to (io "cmd" object, or ana setpoint).</summary>
     public long? CommandId { get; set; }
-
     /// <summary>Light only: ana object holding the current level (0-100).</summary>
     public long? BrightnessStateId { get; set; }
 

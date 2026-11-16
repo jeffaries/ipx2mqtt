@@ -134,6 +134,33 @@ public class EntityDiscoveryTests
     }
 
     [Fact]
+    public void Discover_BoardRelayDrivenByTeleruptorIsCommandedThroughIt()
+    {
+        var inv = Inventory();
+        var objects = inv.Objects.ToList();
+        // Board relay 1 (cmd 65536, link0 12648447+1 is its own; wire 5000 comes from teleruptor 1) and an 8R relay on a teleruptor too.
+        objects[objects.FindIndex(o => o.Id == 65536)] = objects.Single(o => o.Id == 65536) with { Link0 = 5000 };
+        objects[objects.FindIndex(o => o.Id == 65614)] = objects.Single(o => o.Id == 65614) with { Link0 = 5001 };
+        objects.Add(new(70001, "[Telerupteur 01-IPX.1]Input", 0, false, 1));
+        objects.Add(new(70002, "[Telerupteur 01-IPX.1]Output", 5000, false, 2));
+        objects.Add(new(70003, "[Telerupteur 03-8R.1]Input", 0, false, 3));
+        objects.Add(new(70004, "[Telerupteur 03-8R.1]Output", 5001, false, 4));
+
+        var e = IpxEntityDiscovery.Discover(new IpxInventory(objects, inv.Extensions));
+
+        var relay1 = Of(e, "relay").Single(x => x.Index == 1);
+        Assert.Equal(70002, relay1.CommandId);   // output of the teleruptor, an absolute command
+        Assert.Equal(65544, relay1.StateId);     // state still read on the relay
+        Assert.Equal(65537, Of(e, "relay").Single(x => x.Index == 2).CommandId);
+
+        var r8 = Of(e, "03-8r").Single(x => x.Index == 1); // extension: left alone
+        Assert.Equal(65614, r8.CommandId);
+
+        var command = Mapper().Map(relay1).Commands.Single().Parse("ON");
+        Assert.Equal(new IpxCommand(70002, true), command);
+    }
+
+    [Fact]
     public void Discover_RejectsUnknownOverrideComponent()
     {
         var overrides = new Dictionary<string, EntityOverride> { ["01-IPX.01"] = new() { Component = "fan" } };

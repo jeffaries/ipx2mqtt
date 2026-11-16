@@ -202,6 +202,16 @@ Renaming updates the entity in place (the `unique_id` does not change). Changing
 another Home Assistant platform, so it is recreated (new `entity_id`, history not carried over). The discovery message
 is only rebuilt at startup.
 
+### Relays driven by a teleruptor (IPX800 board only)
+
+On the IPX800 board (`01-IPX`), a relay can be driven by a logical teleruptor (`[Telerupteur …]` object). The IPX links
+objects through shared link ids; when the output of a teleruptor shares its `link1` with the `link0` of a `Relay cmd`,
+the relay is detected as teleruptor-driven. Writing the relay directly would be undone by the teleruptor logic, so such a
+relay is commanded through the teleruptor: the command is written to its `Output` (`PUT /api/core/io/<id>
+{"on":true|false}`), the last element of the chain before the relay. This is an absolute command (not a toggle), so it
+stays correct even if a button or a rule changed the teleruptor in the meantime. The state is still read from
+`Relay state`. Extension relays (X-8R…) are always commanded directly.
+
 ### Manual declaration
 
 The list of exposed entities can also come from the configuration (`Entities` in `entities.yml`).
