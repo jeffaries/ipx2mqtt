@@ -1,0 +1,44 @@
+# Exemple de config.yml : copiez ce fichier vers config/config.yml (ignoré par git) et adaptez les valeurs.
+# Le dossier config/ est monté dans le conteneur sur /config (voir docker-compose.yml).
+# Toutes les clés sont optionnelles : celles omises prennent la valeur par défaut indiquée.
+
+Mqtt:
+  Host: mosquitto              # nom du service du docker-compose, ou adresse de votre broker (défaut : localhost)
+  Port: 1883
+  Username: ""                 # vide = connexion anonyme
+  Password: ""
+  # UseTls: false
+  ClientId: ipx2mqtt           # doit être unique par instance
+  BaseTopic: ipx800            # préfixe de tous les topics
+
+Discovery:
+  Prefix: homeassistant        # préfixe de découverte de Home Assistant
+
+Device:                        # fiche de l'appareil dans Home Assistant
+  NodeId: ipx800               # lettres, chiffres, "_" et "-"
+  Name: IPX800 V5
+  Manufacturer: GCE Electronics
+  Model: IPX800 V5
+
+Ipx:
+  BaseUrl: http://192.168.1.54 # https:// est utilisé en wss:// pour le WebSocket
+  Login: api                   # utilisateur IPX dédié (niveau "opérateur" ou plus pour envoyer des commandes)
+  Password: change-me
+  ApiKey: ""                   # optionnel : clé API officielle, utilisée pour les appels REST
+  AutoDiscover: true           # expose tous les relais, variateurs et sorties analogiques de l'IPX
+  RequestTimeoutSeconds: 10
+  OfflineGraceSeconds: 5       # délai avant de déclarer l'IPX hors ligne
+  AllowInvalidCertificate: false
+  WebSocket:
+    Enabled: true              # false = polling seul
+    ReceiveTimeoutSeconds: 30
+    KeepAliveSeconds: 15
+    ReconnectMinSeconds: 1
+    ReconnectMaxSeconds: 60
+  Polling:
+    IntervalSeconds: 10        # plan B, actif seulement si le WebSocket est tombé
+
+Push:                          # endpoint optionnel appelé par l'objet Push de l'IPX
+  Enabled: false
+  Port: 8080
+  Token: ""

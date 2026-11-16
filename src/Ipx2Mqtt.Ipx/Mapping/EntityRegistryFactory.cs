@@ -8,18 +8,19 @@ public static class EntityRegistryFactory
     private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(5);
 
     public static EntityRegistry Create(
-        EntityMapper mapper, IReadOnlyList<EntityDefinition> declared, IpxOptions options, IpxHttpApi api, ILogger logger)
+        EntityMapper mapper, EntitiesOptions entities, IpxOptions options, IpxHttpApi api, ILogger logger)
     {
+        IReadOnlyList<EntityDefinition> declared = entities.Entities;
         var definitions = declared;
         if (options.AutoDiscover)
         {
-            definitions = IpxEntityDiscovery.Merge(declared, DiscoverWithRetry(api, options.Labels, logger), logger);
+            definitions = IpxEntityDiscovery.Merge(declared, DiscoverWithRetry(api, entities.Labels, logger), logger);
         }
 
-        var entities = mapper.MapAll(definitions);
+        var mapped = mapper.MapAll(definitions);
         logger.LogInformation("{Declared} declared + {Discovered} auto-discovered entities",
-            declared.Count, entities.Count - declared.Count);
-        return new EntityRegistry(entities);
+            declared.Count, mapped.Count - declared.Count);
+        return new EntityRegistry(mapped);
     }
 
     // The entity list must be complete before MQTT discovery is published: wait for the IPX instead of

@@ -1,0 +1,94 @@
+# Exemple documenté de entities.yml : copiez ce fichier vers config/entities.yml et adaptez-le.
+# Le dossier config/ est monté dans le conteneur sur /config (voir docker-compose.yml).
+#
+# Deux sections, toutes deux optionnelles :
+#   Labels   : noms des entités découvertes automatiquement (Ipx.AutoDiscover: true dans config.yml)
+#   Entities : entités déclarées à la main, prioritaires sur la découverte automatique
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Labels : un nom par canal découvert. Clé = code module "<module>.<canal>", le nom de l'objet IPX
+# "[04-8R]Relay cmd 5" donne "04-8R.05" ; "[06-DM]On/Off 3" donne "06-DM.03" ; "[01-IPX]Relay cmd 1" donne "01-IPX.01".
+# Un canal sans libellé garde un nom générique (« 03-8R relais 3 »). Mettez les clés entre guillemets (elles contiennent
+# un point). Si un nom change, Home Assistant renomme l'entité sans la recréer.
+#
+# Ce qui est découvert :
+#   [01-IPX] relais de la carte        -> switch  (topics relay/<n>)
+#   [IPX] Open coll. n                 -> switch  (collector/<n>)
+#   [NN-8R]  relais X-8R               -> switch  (<NN>-8r/<n>)
+#   [NN-DM]  variateur X-DIMMER        -> light   (<NN>-dm/<n>) : marche + niveau 0-100
+#   [NN-DM]  On/Off All                -> switch  (<NN>-dm-all/1)
+#   X-010V, X-PWM, X-400               -> number  (sorties analogiques, 0-100)
+# ---------------------------------------------------------------------------------------------------------------------
+Labels:
+  "01-IPX.01": Lumières Cuisine
+  "03-8R.02": Lumières Bureau
+  "04-8R.05": Z3 1er Etage
+  "06-DM.01": Lumières Salle à manger
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Entities : entités déclarées à la main. Une entité découverte qui utilise les mêmes identifiants IPX est ignorée.
+#
+# Champs communs :
+#   Type       (obligatoire) libellé utilisé dans les topics : lettres, chiffres, "_" et "-" (relay, input, analog...)
+#   Index      numéro dans les topics ipx800/<Type>/<Index>/state ; défaut : StateId (sinon CommandId)
+#   Name       (obligatoire) nom affiché dans Home Assistant
+#   Component  (obligatoire) switch | binary_sensor | sensor | light | number
+#   StateId    objet IPX qui porte l'état (io ou ana)
+#   CommandId  objet IPX à écrire pour commander
+#   DeviceClass, Icon   classe d'appareil / icône Home Assistant (optionnels)
+#
+# Trouver les identifiants "_id" : GET http://<ipx>/api/core/io et /api/core/ana (voir le README).
+# Sur l'IPX V5 la commande et l'état d'un relais sont deux objets : "Relay cmd 1" (commande) et "Relay state 1" (état).
+# ---------------------------------------------------------------------------------------------------------------------
+Entities:
+  # switch : relais. CommandId obligatoire ; sans StateId, l'état est lu sur CommandId.
+  - Type: relay
+    Index: 1
+    Name: Éclairage garage
+    Component: switch
+    StateId: 65544            # [01-IPX]Relay state 1
+    CommandId: 65536          # [01-IPX]Relay cmd 1
+
+  # binary_sensor : entrée numérique. StateId obligatoire. Invert: true inverse ON/OFF.
+  - Type: input
+    Index: 1
+    Name: Porte garage
+    Component: binary_sensor
+    StateId: 65552            # [01-IPX]Digital input 1
+    DeviceClass: door
+    Invert: false
+
+  # sensor : valeur analogique (lecture seule). StateId obligatoire.
+  #   Unit, StateClass (measurement, total...), Decimals = nombre de décimales publiées
+  - Type: analog
+    Index: 1
+    Name: Température cave
+    Component: sensor
+    StateId: 262153           # [IPX]Analog input 1
+    Unit: "°C"
+    DeviceClass: temperature
+    StateClass: measurement
+    Decimals: 1
+
+  # light : variateur. CommandId = objet On/Off. Optionnel : niveau 0-100 avec
+  #   BrightnessCommandId (objet "Consign", niveau demandé) et BrightnessStateId (objet "Position", niveau réel).
+  - Type: dimmer
+    Index: 1
+    Name: Salon
+    Component: light
+    StateId: 65587            # [06-DM]On/Off 1
+    CommandId: 65587
+    BrightnessCommandId: 262194   # [06-DM]Consign 1
+    BrightnessStateId: 196617     # [06-DM]Position 1
+
+  # number : curseur sur un objet analogique réglable. CommandId obligatoire.
+  #   Min et Max (défauts 0 et 100) bornent les valeurs acceptées ; Unit, Decimals optionnels.
+  - Type: pwm
+    Index: 1
+    Name: Sortie PWM 1
+    Component: number
+    StateId: 262400
+    CommandId: 262400
+    Min: 0
+    Max: 100
+    Unit: "%"

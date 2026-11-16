@@ -21,7 +21,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Extra settings (entity labels...): mount a folder holding ipx2mqtt.json on /config (see docker-compose.yml).
+# Configuration: mount a folder holding config.yml and entities.yml on /config (see docker-compose.yml).
 # The optional Push endpoint listens on Push__Port (default 8080) when Push__Enabled=true.
 EXPOSE 8080
 ENV DOTNET_EnableDiagnostics=0

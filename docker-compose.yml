@@ -1,6 +1,7 @@
 # Exemple : ipx2mqtt + Mosquitto.
+# Toute la configuration vient des deux fichiers YAML du dossier ./config (config.yml et entities.yml).
 # Si vous avez déjà un broker Mosquitto, supprimez le service "mosquitto" et
-# pointez Mqtt__Host vers votre broker.
+# renseignez Mqtt.Host dans config/config.yml.
 
 services:
   ipx2mqtt:
@@ -10,58 +11,11 @@ services:
     restart: unless-stopped
     depends_on:
       - mosquitto
-    environment:
-      # --- Broker MQTT ---
-      Mqtt__Host: mosquitto
-      Mqtt__Port: 1883
-      # Mqtt__Username: ha
-      # Mqtt__Password: change-me
-      Mqtt__BaseTopic: ipx800
-
-      # --- IPX800 V5 ---
-      Ipx__BaseUrl: http://192.168.1.54
-      Ipx__Login: api
-      Ipx__Password: change-me          # mot de passe de l'utilisateur IPX (ne pas committer !)
-      # Ipx__ApiKey: ""                 # optionnel : clé API officielle pour les appels REST
-
-      # --- Appareil Home Assistant ---
-      Device__NodeId: ipx800
-      Device__Name: IPX800 V5
-
-      # --- Entités (surchargent la liste du fichier appsettings.json) ---
-      # Alternative : monter votre propre appsettings.json (voir plus bas).
-      Entities__0__Type: relay
-      Entities__0__Index: 1
-      Entities__0__Name: Éclairage garage
-      Entities__0__Component: switch
-      Entities__0__StateId: 65544
-      Entities__0__CommandId: 65536
-      Entities__1__Type: input
-      Entities__1__Index: 1
-      Entities__1__Name: Porte garage
-      Entities__1__Component: binary_sensor
-      Entities__1__DeviceClass: door
-      Entities__1__StateId: 65552
-      Entities__2__Type: analog
-      Entities__2__Index: 1
-      Entities__2__Name: Température cave
-      Entities__2__Component: sensor
-      Entities__2__StateId: 262153
-      Entities__2__Unit: "°C"
-      Entities__2__DeviceClass: temperature
-      Entities__2__StateClass: measurement
-      Entities__2__Decimals: 1
-
-      # --- Endpoint Push (optionnel) ---
-      # Push__Enabled: "true"
-      # Push__Port: 8080
-      # Push__Token: change-me
     volumes:
-      # Réglages complémentaires (libellés des entités...) au format appsettings.json : ./config/ipx2mqtt.json
+      # Toute la configuration : ./config/config.yml (MQTT, IPX, appareil) et ./config/entities.yml (entités, libellés)
       - ./config:/config:ro
     # ports:
-    #   - "8080:8080"   # uniquement si Push__Enabled=true
-    #   - ./appsettings.local.json:/app/appsettings.Production.json:ro
+    #   - "8080:8080"   # uniquement si Push.Enabled=true dans config.yml
 
   mosquitto:
     image: eclipse-mosquitto:2

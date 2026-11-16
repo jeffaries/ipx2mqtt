@@ -8,3 +8,7 @@ TestResults/
 appsettings.local.json
 appsettings.Production.json
 .env
+
+# Real configuration (passwords): copy config/config.example.yml to config/config.yml
+config/config.yml
+config/entities.yml

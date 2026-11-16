@@ -21,12 +21,6 @@ public sealed class IpxOptions
     /// <summary>Expose every relay, dimmer and analog output found on the IPX, in addition to the configured Entities (which win).</summary>
     public bool AutoDiscover { get; set; } = true;
 
-    /// <summary>
-    /// Display names for auto-discovered entities, by module code: "&lt;module&gt;.&lt;channel&gt;" such as "04-8R.05",
-    /// "06-DM.03" or "01-IPX.01". Channels without a label get a generic name.
-    /// </summary>
-    public Dictionary<string, string> Labels { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-
     public int RequestTimeoutSeconds { get; set; } = 10;
 
     /// <summary>
@@ -92,4 +86,10 @@ public sealed class PushOptions
 public sealed class EntitiesOptions
 {
     public List<EntityDefinition> Entities { get; set; } = new();
+
+    /// <summary>
+    /// Display names of the auto-discovered entities, by module code "&lt;module&gt;.&lt;channel&gt;"
+    /// ("04-8R.05", "06-DM.03", "01-IPX.01"). Channels without a label get a generic name.
+    /// </summary>
+    public Dictionary<string, string> Labels { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }

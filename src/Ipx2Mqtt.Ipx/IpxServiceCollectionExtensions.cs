@@ -47,7 +47,7 @@ public static class IpxServiceCollectionExtensions
         services.AddSingleton<EntityMapper>();
         services.AddSingleton(sp => EntityRegistryFactory.Create(
             sp.GetRequiredService<EntityMapper>(),
-            sp.GetRequiredService<IOptions<EntitiesOptions>>().Value.Entities,
+            sp.GetRequiredService<IOptions<EntitiesOptions>>().Value,
             sp.GetRequiredService<IOptions<IpxOptions>>().Value,
             sp.GetRequiredService<IpxHttpApi>(),
             sp.GetRequiredService<ILoggerFactory>().CreateLogger("Ipx2Mqtt.Ipx.Mapping.EntityDiscovery")));

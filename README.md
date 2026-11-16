@@ -1,363 +1,390 @@
 # ipx2mqtt
 
-Passerelle **IPX800 V5 → MQTT** pour **Home Assistant**, écrite en C# (.NET 10).
+**IPX800 V5 → MQTT** gateway for **Home Assistant**, written in C# (.NET 10).
 
-Le service lit l'état de l'IPX800 V5 (relais, entrées numériques, entrées analogiques, extensions EBX), le publie
-sur un broker MQTT et déclare les entités à Home Assistant via la **découverte MQTT par appareil**
-(*MQTT Discovery*). Pas d'intégration HACS, pas de Node-RED.
+The service reads the state of the IPX800 V5 (relays, digital inputs, analog inputs, EBX extensions), publishes it
+to an MQTT broker and declares the entities to Home Assistant through **MQTT device discovery**
+(*MQTT Discovery*). No HACS integration, no Node-RED.
 
-C'est le premier d'une série d'adaptateurs (Daikin, HomeWizard…) : toute la partie MQTT / Discovery /
-disponibilité est isolée dans `Ipx2Mqtt.Core` et ne dépend pas de l'IPX.
+It is the first of a series of adapters (Daikin, HomeWizard…): everything related to MQTT / discovery /
+availability is isolated in `Ipx2Mqtt.Core` and does not depend on the IPX.
 
-> **Documentation de l'API IPX** : les fichiers OpenAPI officiels de GCE sont conservés dans
-> [docs/ipx-api/](docs/ipx-api/) et le protocole utilisé par ce service (login chiffré, WebSocket, commandes)
-> est résumé dans [docs/ipx-protocol.md](docs/ipx-protocol.md).
+> **IPX API documentation**: the official GCE OpenAPI files are kept in
+> [docs/ipx-api/](docs/ipx-api/) and the protocol used by this service (encrypted login, WebSocket, commands)
+> is summarised in [docs/ipx-protocol.md](docs/ipx-protocol.md).
 
-## Sommaire
+## Contents
 
-- [Fonctionnement](#fonctionnement)
-- [Démarrage rapide (Docker)](#démarrage-rapide-docker)
+- [How it works](#how-it-works)
+- [Quick start (Docker)](#quick-start-docker)
 - [Configuration](#configuration)
-- [Déclarer les entités](#déclarer-les-entités)
-- [Topics MQTT](#topics-mqtt)
-- [Variables d'environnement](#variables-denvironnement)
-- [Objet PUSH sur l'IPX (optionnel)](#objet-push-sur-lipx-optionnel)
-- [Dépannage avec MQTT Explorer](#dépannage-avec-mqtt-explorer)
-- [Développement](#développement)
-- [Limites connues](#limites-connues)
+- [Declaring entities](#declaring-entities)
+- [MQTT topics](#mqtt-topics)
+- [Environment variables](#environment-variables-optional)
+- [IPX Push object (optional)](#ipx-push-object-optional)
+- [Troubleshooting with MQTT Explorer](#troubleshooting-with-mqtt-explorer)
+- [Development](#development)
+- [Known limitations](#known-limitations)
 
-## Fonctionnement
+## How it works
 
 ```
-                 WebSocket (source principale)
+                 WebSocket (main source)
    IPX800 V5 ─────────────────────────────────┐
-        │   REST /api/core/* (polling, plan B)│      ┌───────────┐        ┌────────────────┐
-        │   REST PUT (commandes)              ├────► │ ipx2mqtt  │ ─────► │ Mosquitto      │ ◄──► Home Assistant
+        │   REST /api/core/* (polling, fallback)│    ┌───────────┐        ┌────────────────┐
+        │   REST PUT (commands)               ├────► │ ipx2mqtt  │ ─────► │ Mosquitto      │ ◄──► Home Assistant
         └─────────────────────────────────────┘      └───────────┘  MQTT  └────────────────┘     (MQTT Discovery)
 ```
 
-- **Source principale : le WebSocket de l'interface web de l'IPX.** Le client se connecte avec le même
-  login chiffré que l'interface web (AES-ECB), se reconnecte automatiquement avec un *backoff* exponentiel plafonné,
-  détecte une connexion morte (aucun message reçu pendant `ReceiveTimeoutSeconds`) et **resynchronise
-  l'état complet à chaque (re)connexion**.
-- **Plan B : polling REST** (`GET /api/core/io` et `/api/core/ana`). Il s'active automatiquement dès que le
-  WebSocket est indisponible et se désactive dès qu'il revient.
-- **Commandes** (`.../set`) : envoyées par REST (`PUT /api/core/io/{id}`, `PUT /api/core/ana/{id}`).
-  L'état n'est publié **que lorsque l'IPX le confirme** (via le WebSocket ou le polling) : un ordre refusé ou
-  perdu ne laisse jamais Home Assistant dans un état faux.
-- **Disponibilité** (`ipx800/status`) : `offline` uniquement si **les deux sources** sont indisponibles
-  (avec un court délai de grâce, `Ipx__OfflineGraceSeconds`, pour que la bascule WebSocket → REST ne fasse pas
-  « clignoter » les entités). Dernière volonté MQTT (*Last Will*) : `offline`.
-- **Seuls les changements** sont publiés, en *retained*.
-- **Home Assistant redémarre** : le service s'abonne à `homeassistant/status` et, à la réception de `online`,
-  republie la découverte (après un délai aléatoire de 1 à 5 s) puis tous les états courants.
-- Le WebSocket n'étant **pas une API officielle**, un message inconnu ou mal formé est ignoré (log `Debug`),
-  compté, et résumé dans un `Warning` agrégé : voir [Limites connues](#limites-connues).
+- **Main source: the WebSocket of the IPX web interface.** The client logs in with the same encrypted login as
+  the web interface (AES-ECB), reconnects automatically with a capped exponential *backoff*, detects a dead
+  connection (no message received for `ReceiveTimeoutSeconds`) and **resynchronises the complete state on every
+  (re)connection**.
+- **Fallback: REST polling** (`GET /api/core/io` and `/api/core/ana`). It starts automatically as soon as the
+  WebSocket is unavailable and stops as soon as it is back.
+- **Commands** (`.../set`): sent over REST (`PUT /api/core/io/{id}`, `PUT /api/core/ana/{id}`).
+  The state is published **only once the IPX confirms it** (through the WebSocket or the polling): a refused or
+  lost command never leaves Home Assistant in a wrong state.
+- **Availability** (`ipx800/status`): `offline` only when **both sources** are unavailable
+  (with a short grace delay, `OfflineGraceSeconds`, so that the WebSocket → REST hand-over does not make the
+  entities flap). MQTT Last Will: `offline`.
+- **Only changes** are published, *retained*.
+- **Home Assistant restarts**: the service subscribes to `homeassistant/status` and, when it receives `online`,
+  republishes the discovery (after a random 1 to 5 s delay) and then all the current states.
+- The WebSocket is **not an official API**: an unknown or malformed message is ignored (`Debug` log),
+  counted, and summarised in an aggregated `Warning`: see [Known limitations](#known-limitations).
 
-## Démarrage rapide (Docker)
+## Quick start (Docker)
 
-1. Repérez les identifiants `_id` des objets à exposer (voir [Déclarer les entités](#déclarer-les-entités)).
-2. Éditez [docker-compose.yml](docker-compose.yml) : adresse de l'IPX (`Ipx__BaseUrl`), mot de passe
-   (`Ipx__Password`) et entités.
-3. Lancez :
+1. Edit the two files of the [config/](config/) folder: [config.yml](config/config.yml) (MQTT broker, IPX address
+   and credentials) and [entities.yml](config/entities.yml) (labels and entities). Templates:
+   [config.example.yml](config/config.example.yml) and [entities.example.yml](config/entities.example.yml).
+2. Start:
 
 ```bash
 docker compose up -d --build
 docker compose logs -f ipx2mqtt
 ```
 
-Au démarrage, les logs doivent indiquer : connexion au broker MQTT, `Logged in to the IPX`,
-`IPX WebSocket connected`, `IPX full state resynchronised (N objects)`, puis `IPX is now available`.
-Les entités apparaissent dans Home Assistant (*Paramètres → Appareils et services → MQTT*) sous
-l'appareil « IPX800 V5 ».
+At startup the logs should show: connection to the MQTT broker, `Logged in to the IPX`,
+`IPX WebSocket connected`, `IPX full state resynchronised (N objects)`, then `IPX is now available`.
+The entities appear in Home Assistant (*Settings → Devices & services → MQTT*) under the
+"IPX800 V5" device.
 
-> **Utilisateur IPX dédié** : créez sur l'IPX un utilisateur réservé à ce service (niveau « opérateur » ou
-> supérieur pour pouvoir envoyer des commandes). Ne commitez jamais son mot de passe : utilisez une variable
-> d'environnement ou un fichier `.env` non versionné.
+> **Dedicated IPX user**: create a user on the IPX reserved for this service ("operator" level or higher to be
+> able to send commands). Never commit its password: `config/config.yml` contains passwords and is ignored by git.
+
+### Published image (GitHub Container Registry)
+
+The workflow [.github/workflows/docker.yml](.github/workflows/docker.yml) runs the tests on every push and
+pull request, then publishes the image to `ghcr.io/<user>/<repository>` from `main` (tags `latest`, `main`,
+`sha-…`) and from `v1.2.3` tags (tags `1.2.3` and `1.2`). No secret to create. To use it, replace
+`build: .` with `image: ghcr.io/<user>/<repository>:latest` in `docker-compose.yml`. If the repository is private,
+log in first: `docker login ghcr.io` with a token that has the `read:packages` scope. The image is built for
+`linux/amd64` only.
 
 ## Configuration
 
-La configuration vient de [appsettings.json](src/Ipx2Mqtt.Service/appsettings.json), surchargeable par des
-[variables d'environnement](#variables-denvironnement) (séparateur `__`). Vous pouvez aussi monter votre propre
-fichier : `-v ./appsettings.local.json:/app/appsettings.Production.json:ro`.
+All the configuration lives in **two YAML files**, outside the application, in the [config/](config/) folder:
 
-| Section | Clé | Défaut | Rôle |
+| File | Content |
+|---|---|
+| [config/config.yml](config/config.yml) | `Mqtt`, `Discovery`, `Device`, `Ipx`, `Push` (table below). Template: [config/config.example.yml](config/config.example.yml); the real file is ignored by git |
+| [config/entities.yml](config/entities.yml) | `Labels` (names of the discovered entities) and `Entities` (declared entities). Documented template: [config/entities.example.yml](config/entities.example.yml) |
+
+**Docker**: the folder is mounted read-only on `/config` (`./config:/config:ro` in
+[docker-compose.yml](docker-compose.yml), which contains no environment variable). The service reads
+`config.yml` and `entities.yml` from there. Outside Docker it looks for the folder, first match wins: the
+`IPX2MQTT_CONFIG_DIR` environment variable, `/config`, then `config/` in the current directory or one of its
+parents (F5 in VS Code). The startup log says "Configuration loaded from …". Restart the service after a change.
+
+Precedence: `appsettings.json` (logging) < `config.yml` < `entities.yml` < environment variables
+(`Section__Key`, optional) < command line.
+
+| Section | Key | Default | Purpose |
 |---|---|---|---|
-| `Mqtt` | `Host`, `Port` | `localhost`, `1883` | Broker MQTT |
-| | `Username`, `Password`, `UseTls` | — | Authentification / TLS |
-| | `ClientId` | `ipx2mqtt` | Identifiant client (unique par instance) |
-| | `BaseTopic` | `ipx800` | **Préfixe de tous les topics** |
-| `Discovery` | `Prefix` | `homeassistant` | Préfixe de découverte de Home Assistant |
-| | `StatusTopic` | `homeassistant/status` | Topic de naissance de Home Assistant |
-| `Device` | `NodeId` | `ipx800` | Identifiant de l'appareil (lettres, chiffres, `_`, `-`) |
-| | `Name`, `Manufacturer`, `Model` | `IPX800 V5`… | Fiche de l'appareil dans Home Assistant |
-| `Ipx` | `BaseUrl` | `http://192.168.1.54` | URL de l'IPX (`https://` → `wss://` automatiquement) |
-| | `Login`, `Password` | `api`, — | Utilisateur IPX (login chiffré, requis pour le WebSocket) |
-| | `ApiKey` | — | Clé API officielle (optionnelle) : si renseignée, les appels REST l'utilisent |
-| | `RequestTimeoutSeconds` | `10` | Délai des requêtes REST |
-| | `AutoDiscover` | `true` | Exposer automatiquement relais, variateurs et sorties analogiques |
-| | `OfflineGraceSeconds` | `5` | Délai avant de déclarer l'IPX hors ligne |
-| | `AllowInvalidCertificate` | `false` | Accepter un certificat auto-signé |
-| `Ipx:WebSocket` | `Enabled` | `true` | Désactiver pour n'utiliser que le polling |
-| | `ReceiveTimeoutSeconds` | `30` | Silence toléré avant de considérer la connexion morte |
-| | `KeepAliveSeconds` | `15` | Keep-alive WebSocket |
-| | `ReconnectMinSeconds` / `ReconnectMaxSeconds` | `1` / `60` | Bornes du *backoff* exponentiel |
-| `Ipx:Polling` | `IntervalSeconds` | `10` | Période du polling (plan B, actif seulement si le WebSocket est tombé) |
-| `Push` | `Enabled`, `Port`, `Token` | `false`, `8080` | [Endpoint push](#objet-push-sur-lipx-optionnel) |
+| `Mqtt` | `Host`, `Port` | `localhost`, `1883` | MQTT broker |
+| | `Username`, `Password`, `UseTls` | — | Authentication / TLS |
+| | `ClientId` | `ipx2mqtt` | Client id (unique per instance) |
+| | `BaseTopic` | `ipx800` | **Prefix of all topics** |
+| `Discovery` | `Prefix` | `homeassistant` | Home Assistant discovery prefix |
+| | `StatusTopic` | `homeassistant/status` | Home Assistant birth topic |
+| `Device` | `NodeId` | `ipx800` | Device id (letters, digits, `_`, `-`) |
+| | `Name`, `Manufacturer`, `Model` | `IPX800 V5`… | Device card in Home Assistant |
+| `Ipx` | `BaseUrl` | `http://192.168.1.54` | IPX URL (`https://` → `wss://` automatically) |
+| | `Login`, `Password` | `api`, — | IPX user (encrypted login, required by the WebSocket) |
+| | `ApiKey` | — | Official API key (optional): when set, REST calls use it |
+| | `RequestTimeoutSeconds` | `10` | REST request timeout |
+| | `AutoDiscover` | `true` | Expose every relay, dimmer and analog output automatically |
+| | `OfflineGraceSeconds` | `5` | Delay before the IPX is declared offline |
+| | `AllowInvalidCertificate` | `false` | Accept a self-signed certificate |
+| `Ipx:WebSocket` | `Enabled` | `true` | Disable to use polling only |
+| | `ReceiveTimeoutSeconds` | `30` | Silence tolerated before the connection is considered dead |
+| | `KeepAliveSeconds` | `15` | WebSocket keep-alive |
+| | `ReconnectMinSeconds` / `ReconnectMaxSeconds` | `1` / `60` | Bounds of the exponential *backoff* |
+| `Ipx:Polling` | `IntervalSeconds` | `10` | Polling period (fallback, only active while the WebSocket is down) |
+| `Push` | `Enabled`, `Port`, `Token` | `false`, `8080` | [Push endpoint](#ipx-push-object-optional) |
 
-L'IPX publie son horloge chaque seconde sur le WebSocket ; c'est ce qui permet de détecter une connexion
-morte rapidement. Les objets non déclarés dans `Entities` (horloge, diagnostics…) sont ignorés dès leur arrivée.
+The IPX publishes its clock every second on the WebSocket; this is what allows a dead connection to be detected
+quickly. Objects that are not exposed (clock, diagnostics…) are ignored as soon as they arrive.
 
-## Déclarer les entités
+## Declaring entities
 
-### Découverte automatique (par défaut)
+### Automatic discovery (default)
 
-Au démarrage, le service lit la liste des objets de l'IPX (`/api/core/io`, `/api/core/ana`) et expose **tous** les
-relais, variateurs et sorties analogiques trouvés, sans rien déclarer. L'IPX ne renvoie pas les `_id` dans la
-description de ses extensions : ils sont déduits des **noms d'objets**, qui suivent des motifs fixes.
+At startup the service reads the list of IPX objects (`/api/core/io`, `/api/core/ana`) and exposes **all** the
+relays, dimmers and analog outputs it finds, without declaring anything. The IPX does not return the object `_id`s
+in the description of its extensions: they are deduced from the **object names**, which follow fixed patterns.
 
-| Objets IPX (nom) | Entité Home Assistant | Type / index (topics) |
+| IPX objects (name) | Home Assistant entity | Type / index (topics) |
 |---|---|---|
 | `[01-IPX]Relay cmd n` + `Relay state n` | `switch` | `relay/n` |
 | `[IPX]Open coll. n` + `Open coll. state n` | `switch` | `collector/n` |
 | `[03-8R]Relay cmd n` + `Relay state n` (X-8R) | `switch` | `03-8r/n` |
-| `[06-DM]On/Off n` + `Consign n` + `Position n` (variateur) | `light` (marche + niveau 0-100) | `06-dm/n` |
-| `[06-DM]On/Off All` | `switch` (tout) | `06-dm-all/1` |
-| Objets `ana` liés à un X-010V, X-PWM ou X-400 | `number` (0-100) | `x010v`, `xpwm`, `x400` |
+| `[06-DM]On/Off n` + `Consign n` + `Position n` (dimmer) | `light` (on/off + 0-100 level) | `06-dm/n` |
+| `[06-DM]On/Off All` | `switch` (all channels) | `06-dm-all/1` |
+| `ana` objects linked to an X-010V, X-PWM or X-400 | `number` (0-100) | `x010v`, `xpwm`, `x400` |
 
-Les entités déclarées dans `Entities` (ci-dessous) **restent prioritaires** : une entité découverte qui utilise les
-mêmes identifiants IPX est ignorée. Si l'IPX est injoignable au démarrage, le service réessaie toutes les 5 s
-(la découverte MQTT n'est publiée qu'une fois la liste complète). Désactivation : `Ipx__AutoDiscover=false`.
-Le log de démarrage indique « N declared + M auto-discovered entities ».
+Entities declared in `Entities` (below) **take precedence**: a discovered entity that uses the same IPX ids is
+ignored. If the IPX is unreachable at startup, the service retries every 5 s (the MQTT discovery is only published
+once the list is complete). To disable: `AutoDiscover: false` under `Ipx` in config.yml.
+The startup log says "N declared + M auto-discovered entities".
 
-> Les sorties X-010V / X-PWM / X-400 n'ont pas pu être validées (absentes de l'IPX de test).
+> The X-010V / X-PWM / X-400 outputs could not be validated (not present on the test IPX).
 
-### Libellés des entités découvertes : `config/ipx2mqtt.json`
+### Labels of the discovered entities: `Labels` in `entities.yml`
 
-Les noms affichés dans Home Assistant se règlent dans un fichier **au format `appsettings.json`**, hors de
-l'application : [config/ipx2mqtt.json](config/ipx2mqtt.json). La clé est le code module `<module>.<canal>`
-(`01-IPX.03`, `03-8R.02`, `04-8R.05`, `06-DM.01`…), c'est-à-dire le nom de l'objet IPX (`[04-8R]Relay cmd 5`).
+The names shown in Home Assistant are set in the `Labels` section of [config/entities.yml](config/entities.yml).
+The key is the module code `<module>.<channel>` (`01-IPX.03`, `03-8R.02`, `04-8R.05`, `06-DM.01`…), i.e. the name
+of the IPX object (`[04-8R]Relay cmd 5`).
 
-```json
-{ "Ipx": { "Labels": { "04-8R.05": "Lumières Z3", "06-DM.01": "Lumières Salle à manger Z1" } } }
+```yaml
+Labels:
+  "04-8R.05": Z3 first floor
+  "06-DM.01": Dining room lights Z1
 ```
 
-Un canal sans libellé garde un nom générique (« 03-8R relais 3 »). Le fichier peut contenir n'importe quel autre
-réglage (par exemple `Entities`) ; il surcharge `appsettings.json`, et les variables d'environnement restent
-prioritaires. Emplacement, premier trouvé :
+A channel without a label keeps a generic name ("03-8R relais 3"). If a name changes, Home Assistant updates the
+entity (the `unique_id` does not change). Labels are sent to Home Assistant inside the discovery message, which is
+only rebuilt at startup.
 
-1. la variable d'environnement `IPX2MQTT_CONFIG` (chemin complet ; erreur s'il n'existe pas) ;
-2. `/config/ipx2mqtt.json` : **dans Docker**, montez le dossier avec `./config:/config:ro` (déjà dans
-   [docker-compose.yml](docker-compose.yml)) ;
-3. `config/ipx2mqtt.json` dans le dossier courant ou l'un de ses parents (développement : F5 sous VS Code).
+### Manual declaration
 
-Le log de démarrage indique « Extra settings loaded from … ». Après une modification, redémarrez le service ;
-si un nom change, Home Assistant met à jour l'entité (l'`unique_id` ne change pas).
+The list of exposed entities can also come from the configuration (`Entities` in `entities.yml`).
 
-### Déclaration manuelle
-
-La liste des entités exposées vient aussi de la configuration (`Entities`).
-
-```json
-"Entities": [
-  { "Type": "relay",  "Index": 1, "Name": "Éclairage garage", "Component": "switch",
-    "StateId": 65544, "CommandId": 65536 },
-  { "Type": "input",  "Index": 1, "Name": "Porte garage", "Component": "binary_sensor",
-    "StateId": 65552, "DeviceClass": "door" },
-  { "Type": "analog", "Index": 1, "Name": "Température cave", "Component": "sensor",
-    "StateId": 262153, "Unit": "°C", "DeviceClass": "temperature", "StateClass": "measurement", "Decimals": 1 }
-]
+```yaml
+Entities:
+  - { Type: relay,  Index: 1, Name: Garage light, Component: switch, StateId: 65544, CommandId: 65536 }
+  - { Type: input,  Index: 1, Name: Garage door, Component: binary_sensor, StateId: 65552, DeviceClass: door }
+  - { Type: analog, Index: 1, Name: Cellar temperature, Component: sensor, StateId: 262153,
+      Unit: "°C", DeviceClass: temperature, StateClass: measurement, Decimals: 1 }
 ```
 
-### Trouver les `_id`
+### Finding the `_id`s
 
-Sur l'IPX V5, **chaque objet a un identifiant numérique `_id`**, et la commande et l'état d'un relais sont
-**deux objets distincts** :
+On the IPX V5, **every object has a numeric `_id`**, and the command and the state of a relay are
+**two separate objects**:
 
-| Objet IPX | `_id` (exemple) |
+| IPX object | `_id` (example) |
 |---|---|
-| `[01-IPX]Relay cmd 1` (commande) | 65536 |
-| `[01-IPX]Relay state 1` (état) | 65544 |
+| `[01-IPX]Relay cmd 1` (command) | 65536 |
+| `[01-IPX]Relay state 1` (state) | 65544 |
 | `[01-IPX]Digital input 1` | 65552 |
 | `[IPX]Analog input 1` | 262144 |
 
-Pour lister tous les objets avec leur nom (remplacez l'hôte et le jeton ; ou utilisez une clé API avec
-`?ApiKey=...`) :
+To list all the objects with their names (replace the host and the token; or use an API key with
+`?ApiKey=...`):
 
 ```bash
-curl "http://IPX/api/core/io?AuthToken=<jeton>"    # relais, entrées, objets logiques (champ "on")
-curl "http://IPX/api/core/ana?AuthToken=<jeton>"   # valeurs analogiques (champ "value")
+curl "http://IPX/api/core/io?AuthToken=<token>"    # relays, inputs, logic objects ("on" field)
+curl "http://IPX/api/core/ana?AuthToken=<token>"   # analog values ("value" field)
 ```
 
-Plages d'identifiants : `io` 65536–131071, `ana` 196608–393215, `str` 524288–851967.
+Id ranges: `io` 65536–131071, `ana` 196608–393215, `str` 524288–851967.
 
-### Champs d'une entité
+### Entity fields
 
-| Champ | Obligatoire | Description |
+| Field | Required | Description |
 |---|---|---|
-| `Type` | oui | Libellé utilisé dans les topics (`relay`, `input`, `analog`, `dimmer`…) |
-| `Index` | non | Numéro dans les topics. Par défaut : `StateId` (ou `CommandId`) |
-| `Name` | oui | Nom affiché dans Home Assistant |
-| `Component` | oui | `switch`, `binary_sensor`, `sensor`, `light` |
-| `StateId` | selon le composant | Objet IPX portant l'état |
-| `CommandId` | `switch`, `light` | Objet IPX à écrire pour commander |
-| `DeviceClass`, `Icon` | non | Classe d'appareil / icône Home Assistant |
-| `Unit`, `StateClass`, `Decimals` | non | `sensor` : unité, classe d'état, nombre de décimales publiées |
-| `Invert` | non | `binary_sensor` : inverse ON/OFF |
-| `BrightnessStateId`, `BrightnessCommandId` | non | `light` : objets analogiques (0–100) du niveau |
+| `Type` | yes | Label used in the topics (`relay`, `input`, `analog`, `dimmer`…) |
+| `Index` | no | Number used in the topics. Default: `StateId` (or `CommandId`) |
+| `Name` | yes | Name shown in Home Assistant |
+| `Component` | yes | `switch`, `binary_sensor`, `sensor`, `light`, `number` |
+| `StateId` | depends on the component | IPX object holding the state |
+| `CommandId` | `switch`, `light`, `number` | IPX object to write to send a command |
+| `DeviceClass`, `Icon` | no | Home Assistant device class / icon |
+| `Unit`, `StateClass`, `Decimals` | no | `sensor`: unit, state class, number of published decimals |
+| `Invert` | no | `binary_sensor`: inverts ON/OFF |
+| `BrightnessStateId`, `BrightnessCommandId` | no | `light`: analog objects (0–100) of the level |
+| `Min`, `Max` | no | `number`: accepted range (default 0 / 100) |
 
-### Composants pris en charge
+### Supported components
 
-| `Component` | Usage | Exigences |
+| `Component` | Use | Requirements |
 |---|---|---|
-| `switch` | Relais de l'IPX, de l'X-8R… | `CommandId` (et `StateId`, sinon l'état est lu sur `CommandId`) |
-| `binary_sensor` | Entrées numériques, états | `StateId` |
-| `sensor` | Entrées analogiques, mesures | `StateId` |
-| `number` | Curseurs : niveau de variateur, sorties analogiques | `CommandId` ; `Min` / `Max` (défaut 0 / 100) |
-| `light` | Variateurs (X-DIMMER, X-DM) | `CommandId` ; `BrightnessCommandId` / `BrightnessStateId` pour le niveau |
+| `switch` | IPX, X-8R relays… | `CommandId` (and `StateId`, otherwise the state is read from `CommandId`) |
+| `binary_sensor` | Digital inputs, states | `StateId` |
+| `sensor` | Analog inputs, measurements | `StateId` |
+| `number` | Sliders: analog outputs | `CommandId`; `Min` / `Max` (default 0 / 100) |
+| `light` | Dimmers (X-DIMMER, X-DM) | `CommandId`; `BrightnessCommandId` / `BrightnessStateId` for the level |
 
-Exemple de variateur (`[06-DM]On/Off 1` = io 65587, `[06-DM]Consign 1` = ana 262194, `[06-DM]Position 1` = ana 196617) :
+Dimmer example (`[06-DM]On/Off 1` = io 65587, `[06-DM]Consign 1` = ana 262194, `[06-DM]Position 1` = ana 196617):
 
-```json
-{ "Type": "dimmer", "Index": 1, "Name": "Salon", "Component": "light",
-  "StateId": 65587, "CommandId": 65587, "BrightnessCommandId": 262194, "BrightnessStateId": 196617 }
+```yaml
+- { Type: dimmer, Index: 1, Name: Living room, Component: light,
+    StateId: 65587, CommandId: 65587, BrightnessCommandId: 262194, BrightnessStateId: 196617 }
 ```
 
-### Ajouter une extension ou un composant
+### Adding an extension or a component
 
-Chaque plateforme Home Assistant est un petit `IComponentMapper`
-([ComponentMappers.cs](src/Ipx2Mqtt.Ipx/Mapping/ComponentMappers.cs)) enregistré dans
-[IpxServiceCollectionExtensions.cs](src/Ipx2Mqtt.Ipx/IpxServiceCollectionExtensions.cs). Pour un volet roulant
-X-4VR (`cover`), il suffit d'ajouter un mapper qui associe les objets `ioCommandUp/Down/Stop` et
-`anaPosition/anaCommand` : le reste (WebSocket, MQTT, découverte, diff d'états) ne change pas.
+Each Home Assistant platform is a small `IComponentMapper`
+([ComponentMappers.cs](src/Ipx2Mqtt.Ipx/Mapping/ComponentMappers.cs)) registered in
+[IpxServiceCollectionExtensions.cs](src/Ipx2Mqtt.Ipx/IpxServiceCollectionExtensions.cs). For an X-4VR roller
+shutter (`cover`), just add a mapper that associates the `ioCommandUp/Down/Stop` and
+`anaPosition/anaCommand` objects: the rest (WebSocket, MQTT, discovery, state diffing) does not change.
 
-## Topics MQTT
+## MQTT topics
 
-Avec le préfixe par défaut `ipx800` :
+With the default `ipx800` prefix:
 
-| Topic | Sens | Contenu |
+| Topic | Direction | Content |
 |---|---|---|
-| `ipx800/status` | publié, *retained* | `online` / `offline` (Last Will : `offline`) |
-| `ipx800/<type>/<index>/state` | publié, *retained* | `ON`/`OFF` ou valeur numérique (ex. `ipx800/relay/1/state`) |
-| `ipx800/<type>/<index>/set` | souscrit | `ON` / `OFF` |
-| `ipx800/<type>/<index>/brightness/state` | publié, *retained* | niveau 0–100 (`light`) |
-| `ipx800/<type>/<index>/brightness/set` | souscrit | niveau 0–100 (`light`) |
-| `homeassistant/device/<node_id>/config` | publié, *retained* | découverte par appareil |
-| `homeassistant/status` | souscrit | `online` → republication de la découverte puis des états |
+| `ipx800/status` | published, *retained* | `online` / `offline` (Last Will: `offline`) |
+| `ipx800/<type>/<index>/state` | published, *retained* | `ON`/`OFF` or a numeric value (e.g. `ipx800/relay/1/state`) |
+| `ipx800/<type>/<index>/set` | subscribed | `ON` / `OFF` (or a number for a `number`) |
+| `ipx800/<type>/<index>/brightness/state` | published, *retained* | level 0–100 (`light`) |
+| `ipx800/<type>/<index>/brightness/set` | subscribed | level 0–100 (`light`) |
+| `homeassistant/device/<node_id>/config` | published, *retained* | device discovery |
+| `homeassistant/status` | subscribed | `online` → republishes the discovery, then the states |
 
-La découverte est **un seul message** par appareil (`dev`, `o`, `cmps`). Les topics d'état et de commande sont
-déclarés **dans chaque composant** (les options de la racine s'appliqueraient à tous les composants) ; seule la
-disponibilité est partagée à la racine.
+The discovery is **a single message** per device (`dev`, `o`, `cmps`). The state and command topics are declared
+**in each component** (root-level options would apply to every component); only the availability is shared at the
+root.
 
-**Supprimer proprement les entités** : publiez un message *retained* **vide** sur le topic de découverte :
+Every published message is *retained*. States are published only when their value changes, and all known states
+are sent again after an MQTT reconnection and when Home Assistant restarts.
+
+**Cleanly removing the entities**: publish an **empty** *retained* message on the discovery topic:
 
 ```bash
 mosquitto_pub -h <broker> -t homeassistant/device/ipx800/config -r -n
 ```
 
-## Variables d'environnement
+## Environment variables (optional)
 
-Toute clé de configuration se surcharge avec `Section__Cle` (deux soulignés). Les listes utilisent l'index :
+The YAML files are enough; any key can additionally be overridden with an environment variable.
 
-| Variable | Exemple |
+Any configuration key is overridden with `Section__Key` (two underscores). Lists use the index:
+
+| Variable | Example |
 |---|---|
 | `Mqtt__Host` | `mosquitto` |
 | `Mqtt__Username` / `Mqtt__Password` | `ha` / `secret` |
-| `Mqtt__BaseTopic` | `maison/ipx` |
+| `Mqtt__BaseTopic` | `home/ipx` |
 | `Ipx__BaseUrl` | `http://192.168.1.54` |
 | `Ipx__Login` / `Ipx__Password` | `api` / `secret` |
-| `Ipx__ApiKey` | clé API officielle (optionnelle) |
-| `Ipx__WebSocket__Enabled` | `false` pour forcer le polling |
+| `Ipx__ApiKey` | official API key (optional) |
+| `Ipx__WebSocket__Enabled` | `false` to force polling |
 | `Ipx__Polling__IntervalSeconds` | `5` |
 | `Device__NodeId` | `ipx800` |
 | `Entities__0__Type` / `Entities__0__Name` / `Entities__0__Component` | `relay` / `Garage` / `switch` |
 | `Entities__0__StateId` / `Entities__0__CommandId` | `65544` / `65536` |
-| `Logging__LogLevel__Default` | `Debug` pour voir chaque message ignoré et chaque changement |
+| `IPX2MQTT_CONFIG_DIR` | folder holding `config.yml` and `entities.yml` |
+| `Logging__LogLevel__Default` | `Debug` to see every ignored message and every change |
 
-## Objet PUSH sur l'IPX (optionnel)
+## IPX Push object (optional)
 
-Le WebSocket suffit normalement. L'endpoint *push* est une **source complémentaire** : l'objet **Push** de l'IPX
-envoie une requête HTTP au service à chaque changement d'un objet que vous lui associez.
+The WebSocket is normally enough. The *push* endpoint is a **complementary source**: the IPX **Push** object
+sends an HTTP request to the service whenever an object you associate with it changes.
 
-> ⚠️ **Fonctionnalité non validée sur matériel réel.** Le format exact de la requête envoyée par l'objet Push
-> dépend de sa configuration ; les deux formes ci-dessous sont celles que le service sait lire.
+> ⚠️ **Feature not validated on real hardware.** The exact format of the request sent by the Push object
+> depends on its configuration; the two forms below are the ones the service can read.
 
-1. Activez l'endpoint : `Push__Enabled=true`, `Push__Port=8080` (publiez le port dans Docker) et, de préférence,
-   `Push__Token=<secret>`.
-2. Sur l'IPX, créez un objet **Push** (*Objets → Push*) :
-   - **Adresse** : l'adresse IP de la machine qui héberge ipx2mqtt, **port** `8080`, méthode `GET`.
-   - **URI ON** : `/push/65544/on?token=<secret>` · **URI OFF** : `/push/65544/off?token=<secret>`
-     (`65544` = `_id` de l'objet d'état, ici l'état du relais 1).
-   - Liez l'entrée **On** du Push à l'objet dont vous voulez suivre les changements.
-3. Pour un envoi JSON, utilisez `POST /push` avec un corps `{"_id": 65544, "on": true}` ou
-   `{"_id": 262153, "value": 9.2}`, et le jeton dans l'en-tête `X-Push-Token`.
+1. Enable the endpoint: `Push.Enabled: true` and `Push.Port: 8080` in `config.yml` (publish the port in Docker) and,
+   preferably, `Push.Token: <secret>`.
+2. On the IPX, create a **Push** object (*Objects → Push*):
+   - **Address**: the IP address of the machine hosting ipx2mqtt, **port** `8080`, method `GET`.
+   - **URI ON**: `/push/65544/on?token=<secret>` · **URI OFF**: `/push/65544/off?token=<secret>`
+     (`65544` = `_id` of the state object, here the state of relay 1).
+   - Link the **On** input of the Push object to the object whose changes you want to follow.
+3. For a JSON call, use `POST /push` with a body `{"_id": 65544, "on": true}` or
+   `{"_id": 262153, "value": 9.2}`, and the token in the `X-Push-Token` header.
 
-| Requête | Effet |
+| Request | Effect |
 |---|---|
-| `GET\|POST\|PUT /push/{id}/{valeur}` | `valeur` = `on`, `off`, `true`, `false` ou un nombre |
-| `POST /push` | corps JSON `{"_id":…, "on":…}` ou `{"_id":…, "value":…}` |
+| `GET\|POST\|PUT /push/{id}/{value}` | `value` = `on`, `off`, `true`, `false` or a number |
+| `POST /push` | JSON body `{"_id":…, "on":…}` or `{"_id":…, "value":…}` |
 
-## Dépannage avec MQTT Explorer
+## Troubleshooting with MQTT Explorer
 
-Avec [MQTT Explorer](https://mqtt-explorer.com/), connectez-vous au broker et regardez l'arborescence :
+With [MQTT Explorer](https://mqtt-explorer.com/), connect to the broker and look at the tree:
 
 1. **`ipx800/status`**
-   - `online` : tout fonctionne.
-   - `offline` : l'IPX est injoignable par **les deux** sources (ou le service est arrêté). Consultez les logs :
-     `docker compose logs ipx2mqtt`. Vérifiez `Ipx__BaseUrl`, le login et le mot de passe
-     (`IPX secure login failed` = identifiants refusés).
-   - absent : le service n'est jamais connecté au broker (`Mqtt__Host`, identifiants MQTT).
-2. **`homeassistant/device/<node_id>/config`** : le JSON de découverte doit exister (case *retained*). S'il manque,
-   les entités n'apparaîtront pas dans Home Assistant. Vérifiez que `homeassistant/status` est bien le topic de
-   naissance configuré dans l'intégration MQTT de Home Assistant.
-3. **`ipx800/<type>/<index>/state`** : valeurs `ON`/`OFF` ou numériques. Si un topic manque, l'`_id` configuré est
-   probablement faux (les objets non déclarés sont ignorés). Passez les logs en `Debug` pour voir les changements.
-4. **Tester une commande** : publiez `ON` sur `ipx800/relay/1/set`. Le log doit afficher
-   `Command sent to IPX object 65536`, puis l'état doit passer à `ON` **quand l'IPX le confirme**. Si l'état ne
-   change pas : l'utilisateur IPX n'a probablement pas le droit d'écrire (erreur `403`) ou la commande a été
-   refusée (voir le log).
-5. **Entités « indisponibles » dans Home Assistant** : `ipx800/status` vaut `offline`, ou le préfixe `BaseTopic`
-   diffère entre la découverte et les topics réels.
-6. **Entités en double après un changement de `Index`, `Type` ou `NodeId`** : supprimez l'ancienne découverte
-   (message *retained* vide, voir plus haut).
-7. **Messages ignorés** : un `Warning` « *N IPX message(s) could not be parsed* » signale un format de message
-   inattendu (voir [Limites connues](#limites-connues)). Passez en `Debug` pour voir chaque message ignoré.
+   - `online`: everything works.
+   - `offline`: the IPX is unreachable through **both** sources (or the service is stopped). Check the logs:
+     `docker compose logs ipx2mqtt`. Check `Ipx.BaseUrl`, the login and the password
+     (`IPX secure login failed` = credentials refused).
+   - missing: the service never connected to the broker (`Mqtt.Host`, MQTT credentials).
+2. **`homeassistant/device/<node_id>/config`**: the discovery JSON must exist (*retained* box). If it is missing,
+   the entities will not appear in Home Assistant. Check that `homeassistant/status` is the birth topic configured
+   in the Home Assistant MQTT integration.
+3. **`ipx800/<type>/<index>/state`**: `ON`/`OFF` or numeric values. If a topic is missing, the configured `_id` is
+   probably wrong (objects that are not exposed are ignored). Switch the logs to `Debug` to see the changes.
+4. **Testing a command**: publish `ON` on `ipx800/relay/1/set`. The log must show
+   `Command sent to IPX object 65536`, then the state must switch to `ON` **when the IPX confirms it**. If the state
+   does not change: the IPX user probably is not allowed to write (`403` error) or the command was refused
+   (see the log).
+5. **Entities "unavailable" in Home Assistant**: `ipx800/status` is `offline`, or the `BaseTopic` prefix differs
+   between the discovery and the actual topics.
+6. **Duplicated entities after changing `Index`, `Type` or `NodeId`**: remove the old discovery (empty *retained*
+   message, see above).
+7. **Ignored messages**: a `Warning` "*N IPX message(s) could not be parsed*" reports an unexpected message format
+   (see [Known limitations](#known-limitations)). Switch to `Debug` to see each ignored message.
+8. **`IPX WebSocket connection failed … status code '200' when status code '101' was expected`**: the IPX answered
+   the WebSocket request with its web page instead of upgrading the connection. The service keeps working through
+   the REST polling (state refreshed every `Polling.IntervalSeconds`). The IPX has a limited number of connections
+   (see the `[DIAG]NB CONNECTIONS RUNNING` analog object): close other clients, restart the IPX, or set
+   `Ipx.WebSocket.Enabled: false` to stop the reconnection attempts. Check whether the IPX web interface itself
+   shows its WebSocket as connected.
 
-## Développement
+## Development
 
 ```bash
 dotnet build
-dotnet test           # tests unitaires + tests d'intégration contre un faux IPX
+dotnet test           # unit tests + integration tests against a fake IPX
 dotnet run --project src/Ipx2Mqtt.Service
 ```
 
-Dans VS Code, `F5` lance le service (configurations dans [.vscode/launch.json](.vscode/launch.json)) : copiez
-[.env.example](.env.example) vers `.env` (ignoré par git) et renseignez l'IPX et le broker.
+In VS Code, `F5` starts the service (configurations in [.vscode/launch.json](.vscode/launch.json)); it reads
+`config/config.yml` and `config/entities.yml` from the repository. The "with .env" launch profile additionally loads
+a `.env` file (copy [.env.example](.env.example) to `.env`, ignored by git) for environment overrides.
 
 ```
-src/Ipx2Mqtt.Core      MQTT, découverte, disponibilité, diff d'états  (indépendant de l'IPX, réutilisable)
-src/Ipx2Mqtt.Ipx       client IPX800 V5 : WebSocket, REST, stratégie, FakeIpxClient, mapping des entités
-src/Ipx2Mqtt.Service   worker, endpoint push, configuration, Program.cs
-tests/Ipx2Mqtt.Tests   xUnit : découverte, mapping, diff d'états, parsing, client IPX contre un faux serveur
+src/Ipx2Mqtt.Core      MQTT, discovery, availability, state diffing  (independent of the IPX, reusable)
+src/Ipx2Mqtt.Ipx       IPX800 V5 client: WebSocket, REST, strategy, FakeIpxClient, entity mapping and discovery
+src/Ipx2Mqtt.Service   worker, push endpoint, configuration files, Program.cs
+tests/Ipx2Mqtt.Tests   xUnit: discovery, mapping, state diffing, parsing, IPX client against a fake server
 ```
 
-Pour réutiliser la partie MQTT dans un autre adaptateur : référencez `Ipx2Mqtt.Core`, appelez
-`services.AddIpx2MqttCore(configuration)`, construisez vos `ComponentDescriptor` et publiez avec
+To reuse the MQTT part in another adapter: reference `Ipx2Mqtt.Core`, call
+`services.AddIpx2MqttCore(configuration)`, build your `ComponentDescriptor`s and publish with
 `DiscoveryBuilder` / `DiscoveryPublisher` / `StatePublisher` / `AvailabilityManager`.
 
-## Limites connues
+## Known limitations
 
-- **Le WebSocket de l'IPX n'est pas documenté.** Le service est construit sur les messages observés
-  (`{"_id": 65638, "on": false}` et `{"_id": …, "value": …}`). Une mise à jour du firmware peut changer ce
-  protocole. Les parades : message inconnu ignoré (jamais bloquant), compteur d'erreurs de parsing, `Warning`
-  agrégé, et **le polling REST prend le relais** tant que le WebSocket est indisponible.
-- **Version du firmware** : l'API documentée n'expose pas de numéro de firmware. Le service journalise au
-  démarrage ce qui est disponible (`/api/system/ipx/info` : `apiVersion` et `objVersion`) et l'ajoute à la fiche
-  de l'appareil. À compléter si vous connaissez l'endpoint qui renvoie le firmware.
-- **Commandes par REST uniquement** : le format des commandes envoyées par le WebSocket n'est pas connu.
-  `PUT /api/core/io/{id}` est utilisé avec le corps documenté `{"on": true|false}` ; les niveaux de variateur
-  passent par `PUT /api/core/ana/{id}` avec `{"value": n}`.
-- Les objets de type texte (`/api/core/str`) ne sont pas lus. Les volets roulants (X-4VR) et les thermostats ne sont
-  pas encore mappés (voir [Ajouter une extension](#ajouter-une-extension-ou-un-composant)).
-- Une courte fenêtre de course existe à la reconnexion : un changement survenu pendant la lecture de l'instantané
-  complet est appliqué ensuite par le WebSocket et prévaut, ce qui est le comportement attendu.
+- **The IPX WebSocket is not documented.** The service is built on observed messages
+  (`{"_id": 65638, "on": false}` and `{"_id": …, "value": …}`). A firmware update may change this protocol.
+  Safeguards: unknown messages are ignored (never blocking), a parsing error counter, an aggregated `Warning`,
+  and **the REST polling takes over** while the WebSocket is unavailable.
+- **Firmware version**: the documented API does not expose a firmware number. At startup the service logs what is
+  available (`/api/system/ipx/info`: `apiVersion` and `objVersion`; this endpoint is missing on some firmwares) and
+  adds it to the device card. To be completed if you know the endpoint that returns the firmware.
+- **Commands over REST only**: the format of the commands sent over the WebSocket is not known.
+  `PUT /api/core/io/{id}` is used with the documented body `{"on": true|false}`; dimmer levels go through
+  `PUT /api/core/ana/{id}` with `{"value": n}`.
+- **Automatic discovery relies on object names** (`[04-8R]Relay cmd 5`…): renaming those objects on the IPX changes
+  what is discovered.
+- Text objects (`/api/core/str`) are not read. Roller shutters (X-4VR) and thermostats are not mapped yet (see
+  [Adding an extension](#adding-an-extension-or-a-component)).
+- A short race window exists on reconnection: a change that happens while the complete snapshot is being read is
+  applied afterwards by the WebSocket and prevails, which is the expected behaviour.
