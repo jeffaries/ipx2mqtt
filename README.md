@@ -71,8 +71,31 @@ At startup the logs should show: connection to the MQTT broker, `Logged in to th
 The entities appear in Home Assistant (*Settings → Devices & services → MQTT*) under the
 "IPX800 V5" device.
 
-> **Dedicated IPX user**: create a user on the IPX reserved for this service ("operator" level or higher to be
-> able to send commands). Never commit its password: `config/config.yml` contains passwords and is ignored by git.
+### IPX user (required) and API key (optional)
+
+**Create a dedicated user on the IPX with the Operator rights (level 2)** and put its login and password in
+`Ipx.Login` / `Ipx.Password` of `config.yml`. Do not reuse an administrator account: the service only needs to read
+the objects and to write relays and levels.
+
+Why a user is required: the IPX WebSocket, which gives instant state changes, only accepts a session token
+(`AuthToken`), and the only way to get one is to log in with a user account. The service therefore always needs
+`Login` and `Password` as long as `Ipx.WebSocket.Enabled` is `true`.
+
+Why an API key may be added: it is **optional**. Without it, the service uses the session token for the REST calls
+too (reading the state, discovery, commands) and logs in again by itself when the token expires. With
+`Ipx.ApiKey` set, the REST calls use the key instead of the token, which does not expire and does not depend on
+the login. The WebSocket still logs in with the user, so the user is needed in both cases. An API key is created by
+an administrator on the IPX; a key of level 1 (User) is enough to read and to send commands, level 0 (Supervisor)
+only reads.
+
+| Setup | What is needed |
+|---|---|
+| WebSocket + REST (recommended) | an Operator user (level 2); the API key is optional |
+| REST polling only (`Ipx.WebSocket.Enabled: false`) | either an Operator user, or only an API key of level 1 |
+
+The minimum levels are the ones given by the GCE OpenAPI files (reading: level 0, commands: level 1, login:
+level 2); lower levels were not tested on real hardware. Never commit these secrets: `config/config.yml` contains
+passwords and is ignored by git.
 
 ### Published image (GitHub Container Registry)
 
