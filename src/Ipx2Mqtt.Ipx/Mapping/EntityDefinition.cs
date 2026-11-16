@@ -3,6 +3,16 @@ namespace Ipx2Mqtt.Ipx.Mapping;
 /// <summary>One exposed entity, as written in the "Entities" configuration list.</summary>
 public sealed class EntityDefinition
 {
+    /// <summary>
+    /// When set, this entry does not declare a new entity: it customises an auto-discovered channel, identified by
+    /// its module code ("04-8R.05") or the numeric id of its command object ("65536"). Only Name, Component and
+    /// Dimmable are used.
+    /// </summary>
+    public string? Key { get; set; }
+
+    /// <summary>light only (with Key): true = on/off + brightness (dimmers only), false = on/off light. Default true.</summary>
+    public bool? Dimmable { get; set; }
+
     /// <summary>Kind label used in topics: relay, input, analog, dimmer, ... (letters, digits, '_' and '-').</summary>
     public string Type { get; set; } = string.Empty;
 

@@ -75,9 +75,10 @@ public class EntityDiscoveryTests
     [Fact]
     public void Discover_AppliesLabelsByModuleCode()
     {
-        var labels = new Dictionary<string, string>
+        var labels = new Dictionary<string, EntityOverride>
         {
-            ["03-8R.02"] = "Lumières Bureau Z1", ["06-DM.01"] = "Salle à manger Z1", ["01-IPX.03"] = "Cuisine Z1",
+            ["03-8R.02"] = new() { Name = "Lumières Bureau Z1" }, ["06-DM.01"] = new() { Name = "Salle à manger Z1" },
+            ["01-IPX.03"] = new() { Name = "Cuisine Z1" },
         };
 
         var e = IpxEntityDiscovery.Discover(Inventory(), labels);
@@ -86,6 +87,58 @@ public class EntityDiscoveryTests
         Assert.Equal("Salle à manger Z1", Of(e, "06-dm").Single(x => x.Index == 1).Name);
         Assert.Equal("Cuisine Z1", Of(e, "relay").Single(x => x.Index == 3).Name);
         Assert.Equal("03-8R relais 3", Of(e, "03-8r").Single(x => x.Index == 3).Name);
+    }
+
+    [Fact]
+    public void Discover_LabelByCommandIdWinsOverModuleCode()
+    {
+        var labels = new Dictionary<string, EntityOverride>
+        {
+            ["65536"] = new() { Name = "By id" }, ["01-IPX.01"] = new() { Name = "By code" }, ["65587"] = new() { Name = "Dimmer by id" },
+        };
+
+        var e = IpxEntityDiscovery.Discover(Inventory(), labels);
+
+        Assert.Equal("By id", Of(e, "relay").Single(x => x.Index == 1).Name);
+        Assert.Equal("Dimmer by id", Of(e, "06-dm").Single(x => x.Index == 1).Name);
+    }
+
+    [Fact]
+    public void Discover_OverridesChangeNameAndPlatform()
+    {
+        var overrides = new Dictionary<string, EntityOverride>
+        {
+            ["01-IPX.01"] = new() { Name = "Lampe", Component = "light" },            // relay -> on/off light
+            ["65537"] = new() { Component = "light", Dimmable = true },               // relay: still no level
+            ["06-DM.01"] = new() { Component = "switch" },                            // dimmer -> switch
+            ["06-DM.02"] = new() { Component = "light", Dimmable = false, Name = "Spot" }, // dimmer -> on/off light
+        };
+
+        var e = IpxEntityDiscovery.Discover(Inventory(), overrides);
+
+        var relay1 = Of(e, "relay").Single(x => x.Index == 1);
+        Assert.Equal(("Lampe", "light", (long?)null), (relay1.Name, relay1.Component, relay1.BrightnessCommandId));
+        Assert.Equal("light", Of(e, "relay").Single(x => x.Index == 2).Component);
+
+        var dm1 = Of(e, "06-dm").Single(x => x.Index == 1);
+        Assert.Equal("switch", dm1.Component);
+        Assert.Null(dm1.BrightnessCommandId);
+
+        var dm2 = Of(e, "06-dm").Single(x => x.Index == 2);
+        Assert.Equal(("Spot", "light", (long?)null, (long?)null), (dm2.Name, dm2.Component, dm2.BrightnessCommandId, dm2.BrightnessStateId));
+        Assert.NotNull(Of(e, "06-dm").Single(x => x.Index == 3).BrightnessCommandId);
+
+        var registry = new EntityRegistry(Mapper().MapAll(e));
+        Assert.DoesNotContain("ipx800/06-dm/2/brightness/set", registry.Commands.Keys);
+        Assert.Contains("ipx800/relay/1/set", registry.Commands.Keys);
+    }
+
+    [Fact]
+    public void Discover_RejectsUnknownOverrideComponent()
+    {
+        var overrides = new Dictionary<string, EntityOverride> { ["01-IPX.01"] = new() { Component = "fan" } };
+
+        Assert.Throws<EntityConfigurationException>(() => IpxEntityDiscovery.Discover(Inventory(), overrides));
     }
 
     [Fact]

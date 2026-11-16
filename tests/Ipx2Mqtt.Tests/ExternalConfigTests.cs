@@ -22,7 +22,7 @@ public class ExternalConfigTests : IDisposable
     public void LocateDirectory_FindsConfigFolderInParents()
     {
         var config = Path.Combine(_root, "config");
-        File.WriteAllText(Path.Combine(config, "entities.yml"), "Labels: {}");
+        File.WriteAllText(Path.Combine(config, "entities.yml"), "Entities: []");
 
         Assert.Equal(config, ExternalConfig.LocateDirectory(null, Path.Combine(config, "sub")));
     }
@@ -41,9 +41,8 @@ public class ExternalConfigTests : IDisposable
         var config = Path.Combine(_root, "config");
         File.WriteAllText(Path.Combine(config, "config.yml"), "Ipx:\n  BaseUrl: http://10.0.0.5\n  AutoDiscover: false\n");
         File.WriteAllText(Path.Combine(config, "entities.yml"), """
-            Labels:
-              "04-8R.05": Z3 1er Etage
             Entities:
+              - { Key: "04-8R.05", Name: Z3 1er Etage, Component: light }
               - { Type: relay, Index: 1, Name: Relais 1, Component: switch, StateId: 65544, CommandId: 65536 }
               - { Type: analog, Index: 1, Name: Temp, Component: sensor, StateId: 262153, Unit: "°C", Decimals: 1 }
             """);
@@ -58,10 +57,11 @@ public class ExternalConfigTests : IDisposable
 
         Assert.Equal("http://10.0.0.5", ipx.BaseUrl);
         Assert.False(ipx.AutoDiscover);
-        Assert.Equal("Z3 1er Etage", entities.Labels["04-8R.05"]);
-        Assert.Equal(2, entities.Entities.Count);
-        Assert.Equal(65536, entities.Entities[0].CommandId);
-        Assert.Equal("°C", entities.Entities[1].Unit);
+        Assert.Equal("Z3 1er Etage", entities.Overrides["04-8R.05"].Name);
+        Assert.Equal("light", entities.Overrides["04-8r.05"].Component);
+        Assert.Equal(2, entities.Declared.Count);
+        Assert.Equal(65536, entities.Declared[0].CommandId);
+        Assert.Equal("°C", entities.Declared[1].Unit);
     }
 
     private static string ConfigDirectory([CallerFilePath] string testFile = "") =>
@@ -84,7 +84,7 @@ public class ExternalConfigTests : IDisposable
             new TopicBuilder("ipx800"),
             Options.Create(new DeviceOptions()));
 
-        Assert.Equal(5, mapper.MapAll(entities.Entities).Count);
-        Assert.Equal("Z3 1er Etage", entities.Labels["04-8R.05"]);
+        Assert.Equal(5, mapper.MapAll(entities.Declared).Count);
+        Assert.Equal("Z3 1er Etage", entities.Overrides["04-8R.05"].Name);
     }
 }

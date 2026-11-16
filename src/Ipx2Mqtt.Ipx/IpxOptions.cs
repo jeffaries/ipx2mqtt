@@ -85,11 +85,33 @@ public sealed class PushOptions
 /// <summary>Root-bound list of exposed entities.</summary>
 public sealed class EntitiesOptions
 {
+    /// <summary>
+    /// Entries with a <see cref="EntityDefinition.Key"/> customise an auto-discovered channel; the others declare an entity.
+    /// </summary>
     public List<EntityDefinition> Entities { get; set; } = new();
 
-    /// <summary>
-    /// Display names of the auto-discovered entities, by module code "&lt;module&gt;.&lt;channel&gt;"
-    /// ("04-8R.05", "06-DM.03", "01-IPX.01"). Channels without a label get a generic name.
-    /// </summary>
-    public Dictionary<string, string> Labels { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>Entities declared by hand (no Key).</summary>
+    public IReadOnlyList<EntityDefinition> Declared => Entities.Where(e => string.IsNullOrWhiteSpace(e.Key)).ToList();
+
+    /// <summary>Customisations of discovered channels (with a Key: module code or command id).</summary>
+    public IReadOnlyDictionary<string, EntityOverride> Overrides =>
+        Entities.Where(e => !string.IsNullOrWhiteSpace(e.Key))
+            .GroupBy(e => e.Key!.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => new EntityOverride { Name = g.Last().Name, Component = g.Last().Component, Dimmable = g.Last().Dimmable },
+                StringComparer.OrdinalIgnoreCase);
+}
+
+/// <summary>Changes applied to one auto-discovered relay or dimmer channel.</summary>
+public sealed class EntityOverride
+{
+    /// <summary>Display name in Home Assistant.</summary>
+    public string? Name { get; set; }
+
+    /// <summary>"switch" or "light". Default: switch for relays, light for dimmers (empty = unchanged).</summary>
+    public string? Component { get; set; }
+
+    /// <summary>Light only: true = on/off + brightness slider (dimmers only), false = on/off light. Default true.</summary>
+    public bool? Dimmable { get; set; }
 }

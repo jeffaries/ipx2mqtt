@@ -31,13 +31,61 @@ public static partial class IpxEntityDiscovery
         RegexOptions.IgnoreCase)]
     private static partial Regex NamePattern();
 
-    public static IReadOnlyList<EntityDefinition> Discover(IpxInventory inventory, IReadOnlyDictionary<string, string>? labels = null)
+    public static IReadOnlyList<EntityDefinition> Discover(
+        IpxInventory inventory,
+        IReadOnlyDictionary<string, EntityOverride>? overrides = null)
     {
-        string Label(string tag, string n, string fallback) =>
-            int.TryParse(n, out var channel) && labels is not null
-            && labels.TryGetValue($"{tag}.{channel:00}", out var label) && !string.IsNullOrWhiteSpace(label)
-                ? label
-                : fallback;
+        // Labels and overrides are keyed by the numeric id of the command object (65536) or by the module code
+        // ("01-IPX.01"); the id wins because it does not depend on the object names.
+        static T? Find<T>(IReadOnlyDictionary<string, T>? map, string tag, string n, long id)
+        {
+            if (map is null)
+            {
+                return default;
+            }
+
+            if (map.TryGetValue(id.ToString(System.Globalization.CultureInfo.InvariantCulture), out var byId))
+            {
+                return byId;
+            }
+
+            return int.TryParse(n, out var channel) && map.TryGetValue($"{tag}.{channel:00}", out var byCode) ? byCode : default;
+        }
+
+        string Label(string tag, string n, long id, string fallback) =>
+            Find(overrides, tag, n, id)?.Name is { } label && !string.IsNullOrWhiteSpace(label) ? label : fallback;
+
+        // Applies the user's overrides: name, platform (switch or light) and, for a light, dimmable or on/off only.
+        EntityDefinition Adjust(EntityDefinition d, string tag, string n, long id)
+        {
+            if (Find(overrides, tag, n, id) is not { } o)
+            {
+                return d;
+            }
+
+            if (!string.IsNullOrWhiteSpace(o.Name))
+            {
+                d.Name = o.Name;
+            }
+
+            var component = string.IsNullOrWhiteSpace(o.Component) ? d.Component : o.Component.Trim().ToLowerInvariant();
+            if (component is not ("switch" or "light"))
+            {
+                throw new EntityConfigurationException($"Overrides '{tag}.{n}': Component must be 'switch' or 'light', not '{o.Component}'.");
+            }
+
+            d.Component = component;
+
+            // Only a dimmer channel has a level (Consign/Position objects); a relay shown as a light is on/off only.
+            var dimmable = component == "light" && (o.Dimmable ?? true);
+            if (!dimmable)
+            {
+                d.BrightnessCommandId = null;
+                d.BrightnessStateId = null;
+            }
+
+            return d;
+        }
 
         var result = new List<EntityDefinition>();
 
@@ -65,15 +113,15 @@ public static partial class IpxEntityDiscovery
                     var stateWhat = what == "relay cmd" ? "relay state" : "open coll. state";
                     var state = byRole.GetValueOrDefault((tag, stateWhat, n));
                     var board = tag.EndsWith("IPX", StringComparison.OrdinalIgnoreCase);
-                    result.Add(new EntityDefinition
+                    result.Add(Adjust(new EntityDefinition
                     {
                         Type = what == "open coll." ? "collector" : board ? "relay" : TypeOf(tag),
                         Index = int.Parse(n),
-                        Name = what == "open coll." ? $"Collecteur ouvert {n}" : Label(tag, n, board ? $"Relais {n}" : $"{tag} relais {n}"),
+                        Name = what == "open coll." ? Label(tag, n, cmd.Id, $"Collecteur ouvert {n}") : Label(tag, n, cmd.Id, board ? $"Relais {n}" : $"{tag} relais {n}"),
                         Component = "switch",
                         CommandId = cmd.Id,
                         StateId = state?.Id ?? cmd.Id,
-                    });
+                    }, tag, n, cmd.Id));
                     break;
 
                 case "on/off":
@@ -92,17 +140,17 @@ public static partial class IpxEntityDiscovery
                     }
 
                     // A dimmer channel = On/Off io + Consign (requested level) + Position (actual level) ana.
-                    result.Add(new EntityDefinition
+                    result.Add(Adjust(new EntityDefinition
                     {
                         Type = TypeOf(tag),
                         Index = int.Parse(n),
-                        Name = Label(tag, n, $"{tag} variateur {n}"),
+                        Name = Label(tag, n, cmd.Id, $"{tag} variateur {n}"),
                         Component = "light",
                         CommandId = cmd.Id,
                         StateId = cmd.Id,
                         BrightnessCommandId = byRole.GetValueOrDefault((tag, "consign", n))?.Id,
                         BrightnessStateId = byRole.GetValueOrDefault((tag, "position", n))?.Id,
-                    });
+                    }, tag, n, cmd.Id));
                     break;
             }
         }

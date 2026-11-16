@@ -1,32 +1,46 @@
 # Exemple documenté de entities.yml : copiez ce fichier vers config/entities.yml et adaptez-le.
 # Le dossier config/ est monté dans le conteneur sur /config (voir docker-compose.yml).
 #
-# Deux sections, toutes deux optionnelles :
-#   Labels   : noms des entités découvertes automatiquement (Ipx.AutoDiscover: true dans config.yml)
-#   Entities : entités déclarées à la main, prioritaires sur la découverte automatique
+# Tout se trouve dans la liste "Entities", qui contient deux sortes d'entrées :
+#   - avec "Key"  : personnalise un canal découvert automatiquement (Ipx.AutoDiscover: true dans config.yml)
+#   - sans "Key"  : déclare une entité à la main, prioritaire sur la découverte automatique
 
 # ---------------------------------------------------------------------------------------------------------------------
-# Labels : un nom par canal découvert. Clé = code module "<module>.<canal>", le nom de l'objet IPX
-# "[04-8R]Relay cmd 5" donne "04-8R.05" ; "[06-DM]On/Off 3" donne "06-DM.03" ; "[01-IPX]Relay cmd 1" donne "01-IPX.01".
-# Un canal sans libellé garde un nom générique (« 03-8R relais 3 »). Mettez les clés entre guillemets (elles contiennent
-# un point). Si un nom change, Home Assistant renomme l'entité sans la recréer.
-#
-# Ce qui est découvert :
+# Ce qui est découvert (par défaut) :
 #   [01-IPX] relais de la carte        -> switch  (topics relay/<n>)
 #   [IPX] Open coll. n                 -> switch  (collector/<n>)
 #   [NN-8R]  relais X-8R               -> switch  (<NN>-8r/<n>)
 #   [NN-DM]  variateur X-DIMMER        -> light   (<NN>-dm/<n>) : marche + niveau 0-100
 #   [NN-DM]  On/Off All                -> switch  (<NN>-dm-all/1)
 #   X-010V, X-PWM, X-400               -> number  (sorties analogiques, 0-100)
+#
+# Personnaliser un canal découvert (entrée avec Key) :
+#   Key        code module "<module>.<canal>" : l'objet IPX "[04-8R]Relay cmd 5" donne "04-8R.05", "[06-DM]On/Off 3" donne
+#              "06-DM.03", "[01-IPX]Relay cmd 1" donne "01-IPX.01". Ou _id numérique de l'objet de commande ("65536"),
+#              indépendant des noms d'objets, prioritaire sur le code module. Mettre la clé entre guillemets.
+#   Name       nom affiché dans Home Assistant (défaut : nom générique, « 03-8R relais 3 »). Renommer ne recrée pas l'entité.
+#   Component  switch | light. Défaut : switch pour un relais, light pour un variateur.
+#   Dimmable   light uniquement. true (défaut) = lumière variable (on/off + curseur de niveau) ; false = lumière on/off.
+#              Seul un variateur [NN-DM] a un niveau : un relais montré en light est toujours on/off.
+#
+# Combinaisons utiles :
+#   relais    -> switch                    (défaut)
+#   relais    -> light on/off              Component: light
+#   variateur -> light variable            (défaut)
+#   variateur -> light on/off              Dimmable: false
+#   variateur -> switch                    Component: switch
+# Changer Component change la plateforme Home Assistant : l'entité est recréée (nouvel entity_id, historique perdu).
 # ---------------------------------------------------------------------------------------------------------------------
-Labels:
-  "01-IPX.01": Lumières Cuisine
-  "03-8R.02": Lumières Bureau
-  "04-8R.05": Z3 1er Etage
-  "06-DM.01": Lumières Salle à manger
+Entities:
+  - { Key: "01-IPX.01", Name: Lumières Cuisine }                                    # renommer seulement
+  - { Key: "03-8R.02",  Name: Lumières Bureau, Component: light }                   # relais présenté comme lumière on/off
+  - { Key: "04-8R.05",  Name: Z3 1er Etage }
+  - { Key: "06-DM.01",  Name: Lumières Salle à manger }                             # variateur : light variable
+  - { Key: "06-DM.02",  Name: Spots salon, Component: light, Dimmable: false }      # variateur utilisé comme light on/off
+  - { Key: "65537",     Name: Lumières Palier }                                     # par _id de "[01-IPX]Relay cmd 2"
 
 # ---------------------------------------------------------------------------------------------------------------------
-# Entities : entités déclarées à la main. Une entité découverte qui utilise les mêmes identifiants IPX est ignorée.
+# Entités déclarées à la main (sans Key). Une entité découverte qui utilise les mêmes identifiants IPX est ignorée.
 #
 # Champs communs :
 #   Type       (obligatoire) libellé utilisé dans les topics : lettres, chiffres, "_" et "-" (relay, input, analog...)
@@ -40,7 +54,6 @@ Labels:
 # Trouver les identifiants "_id" : GET http://<ipx>/api/core/io et /api/core/ana (voir le README).
 # Sur l'IPX V5 la commande et l'état d'un relais sont deux objets : "Relay cmd 1" (commande) et "Relay state 1" (état).
 # ---------------------------------------------------------------------------------------------------------------------
-Entities:
   # switch : relais. CommandId obligatoire ; sans StateId, l'état est lu sur CommandId.
   - Type: relay
     Index: 1

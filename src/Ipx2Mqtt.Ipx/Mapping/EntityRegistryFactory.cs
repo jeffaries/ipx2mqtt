@@ -10,11 +10,11 @@ public static class EntityRegistryFactory
     public static EntityRegistry Create(
         EntityMapper mapper, EntitiesOptions entities, IpxOptions options, IpxHttpApi api, ILogger logger)
     {
-        IReadOnlyList<EntityDefinition> declared = entities.Entities;
+        var declared = entities.Declared;
         var definitions = declared;
         if (options.AutoDiscover)
         {
-            definitions = IpxEntityDiscovery.Merge(declared, DiscoverWithRetry(api, entities.Labels, logger), logger);
+            definitions = IpxEntityDiscovery.Merge(declared, DiscoverWithRetry(api, entities.Overrides, logger), logger);
         }
 
         var mapped = mapper.MapAll(definitions);
@@ -25,14 +25,14 @@ public static class EntityRegistryFactory
 
     // The entity list must be complete before MQTT discovery is published: wait for the IPX instead of
     // publishing a partial device that Home Assistant would then keep.
-    private static IReadOnlyList<EntityDefinition> DiscoverWithRetry(IpxHttpApi api, IReadOnlyDictionary<string, string> labels, ILogger logger)
+    private static IReadOnlyList<EntityDefinition> DiscoverWithRetry(IpxHttpApi api, IReadOnlyDictionary<string, EntityOverride> overrides, ILogger logger)
     {
         for (var attempt = 1; ; attempt++)
         {
             try
             {
                 var inventory = api.GetInventoryAsync(CancellationToken.None).GetAwaiter().GetResult();
-                return IpxEntityDiscovery.Discover(inventory, labels);
+                return IpxEntityDiscovery.Discover(inventory, overrides);
             }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
             {

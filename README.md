@@ -113,7 +113,7 @@ All the configuration lives in **two YAML files**, outside the application, in t
 | File | Content |
 |---|---|
 | [config/config.yml](config/config.yml) | `Mqtt`, `Discovery`, `Device`, `Ipx`, `Push` (table below). Template: [config/config.example.yml](config/config.example.yml); the real file is ignored by git |
-| [config/entities.yml](config/entities.yml) | `Labels` (names of the discovered entities) and `Entities` (declared entities). Documented template: [config/entities.example.yml](config/entities.example.yml) |
+| [config/entities.yml](config/entities.yml) | `Entities` (customisation of discovered entities, and hand-declared entities). Documented template: [config/entities.example.yml](config/entities.example.yml) |
 
 **Docker**: the folder is mounted read-only on `/config` (`./config:/config:ro` in
 [docker-compose.yml](docker-compose.yml), which contains no environment variable). The service reads
@@ -175,21 +175,32 @@ The startup log says "N declared + M auto-discovered entities".
 
 > The X-010V / X-PWM / X-400 outputs could not be validated (not present on the test IPX).
 
-### Labels of the discovered entities: `Labels` in `entities.yml`
+### Customising discovered entities: `Entities` with a `Key`
 
-The names shown in Home Assistant are set in the `Labels` section of [config/entities.yml](config/entities.yml).
-The key is the module code `<module>.<channel>` (`01-IPX.03`, `03-8R.02`, `04-8R.05`, `06-DM.01`…), i.e. the name
-of the IPX object (`[04-8R]Relay cmd 5`).
+Everything lives in the single `Entities` list of [config/entities.yml](config/entities.yml). An entry with a `Key`
+customises an auto-discovered channel; an entry without `Key` declares an entity by hand (next section).
 
 ```yaml
-Labels:
-  "04-8R.05": Z3 first floor
-  "06-DM.01": Dining room lights Z1
+Entities:
+  - { Key: "04-8R.05", Name: Z3 first floor }                                  # rename only
+  - { Key: "03-8R.02", Name: Office lights, Component: light }                 # relay shown as an on/off light
+  - { Key: "06-DM.01", Name: Dining room }                                     # dimmer: dimmable light (default)
+  - { Key: "06-DM.02", Name: Living spots, Component: light, Dimmable: false } # dimmer used as an on/off light
+  - { Key: "06-DM.03", Name: Bedroom, Component: switch }                      # dimmer used as a plain switch
 ```
 
-A channel without a label keeps a generic name ("03-8R relais 3"). If a name changes, Home Assistant updates the
-entity (the `unique_id` does not change). Labels are sent to Home Assistant inside the discovery message, which is
-only rebuilt at startup.
+| Field | Meaning |
+|---|---|
+| `Key` | Module code `<module>.<channel>` (`01-IPX.03`, `04-8R.05`, `06-DM.01`…), i.e. the IPX object name `[04-8R]Relay cmd 5`; or the **numeric `_id` of the command object** (`"65536"`), which does not depend on object names and wins over the module code |
+| `Name` | Name shown in Home Assistant (default: generic, e.g. "03-8R relais 3") |
+| `Component` | `switch` or `light`. Default: `switch` for a relay, `light` for a dimmer |
+| `Dimmable` | `light` only. `true` (default) = on/off + brightness slider (dimmers only); `false` = on/off light. A relay shown as a light is always on/off |
+
+For Home Assistant: a dimmable light is published with `brightness_command_topic`/`brightness_state_topic`
+(scale 0–100); an on/off light has only the command and state topics, which Home Assistant treats as an on/off light.
+Renaming updates the entity in place (the `unique_id` does not change). Changing `Component` moves the entity to
+another Home Assistant platform, so it is recreated (new `entity_id`, history not carried over). The discovery message
+is only rebuilt at startup.
 
 ### Manual declaration
 
