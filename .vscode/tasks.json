@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/src/Ipx2Mqtt.Service/Ipx2Mqtt.Service.csproj", "/property:GenerateFullPaths=true", "/consoleloggerparameters:NoSummary"],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "test",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["test", "${workspaceFolder}/ipx2mqtt.sln"],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "docker compose up",
+      "type": "process",
+      "command": "docker",
+      "args": ["compose", "up", "-d", "--build"],
+      "problemMatcher": []
+    }
+  ]
+}

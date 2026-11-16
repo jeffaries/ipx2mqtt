@@ -1,0 +1,2180 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "IPX 800 V5 API Plugin",
+    "version": "1.0",
+    "contact": {
+      "email": "dev@gce-electronics.com",
+      "name": "GCE Electronics"
+    },
+    "description": "This is a document to describe plugin API requests to manage your IPX 800 V5."
+  },
+  "servers": [
+    {
+      "url": "http://192.168.1.84",
+      "description": "url"
+    }
+  ],
+  "paths": {
+    "/api/plugin/weather": {
+      "parameters": [],
+      "get": {
+        "summary": "GET plugin Weather",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/weather_object"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-plugin-weather",
+        "description": "# Weather plugin description\nPlugin Weather work with openweathermapAPI. He keeps weather day informations and forecast weather for 7 days.\n\n### Object internal configuration:\n* **_id**: Unique ID of object \n* **errorStatus**: Error code according to object auto check: dependencies, configuration values, etc. (0 if OK) \n* **apiKey**: ApiKey is used to keep informations to the server openweather. To generate ApiKey, you need to login on https://openweathermap.org and keep apiKey in category \"My API keys\"\n* **bEnable**: bEnable filed is used to enable/disable weather client \n\n### Object dependancies: \n* **ioCurentDayOn**: representing state of sun (\"on: sun is up, \"off\" sun is down)\n* **strPosition_id**: input STR used to set GPS position at openweather server\n* **anaCurentSunrise**: Sunrise of current day in timestamp unix \n* **anaCurentSunset**: Sunset of current day in timestamp unix \n* **anaCurentTemp**: Temperature of current day \n* **anaCurentPressure**: Pressure of current day \n* **anaCurentHumidity**: Humidity of current day \n* **anaCurentWindSpeed**: Wind Speed of current day \n* **anaCurentClouds**: Clouds of current day \n* **anaCurentLevels**: Levels weather of current day according to this enumeration:\n  * SUN = 0,\n  * SUN_CLOUDS = 1,\n  * CLOWED = 2,\n  * MIST = 3,\n  * RAIN = 4,\n  * THUNDER = 5,\n  * SNOW = 6\n\n* **anaTemp**: Array of 7 values representing Temperature weather of forecast days\n* **anaPressure**: Array of 7 values representing Pressure weather of forecast days\n* **anaHumidity**: Array of 7 values representing Humidity weather of forecast days\n* **anaWindSpeed**: Array of 7 values representing Wind Speed weather of forecast days\n* **anaClouds**: Array of 7 values representing Clouds weather of forecast days\n* **anaLevels**: Array of 7 values representing Levels weather of forecast days according to this enumeration:\n  * SUN = 0,\n  * SUN_CLOUDS = 1,\n  * CLOWED = 2,\n  * MIST = 3,\n  * RAIN = 4,\n  * THUNDER = 5,\n  * SNOW = 6\n",
+        "tags": [
+          "plugin_weather"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "",
+        "operationId": "put-api-plugin-weather",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/weather_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "description": " ",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/plugin_weather"
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "apiKey": "4a44d09b5e36b1bac4da34140238cff4",
+                    "bEnable": true
+                  }
+                }
+              }
+            }
+          },
+          "description": "Object description with new parameters \n* update can be done on partial object\n* some fields are not updatable (ex: dependencies ID's), there are ignored on PUT"
+        },
+        "tags": [
+          "plugin_weather"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/plugin/weather/info": {
+      "get": {
+        "summary": "GET plugin Weather info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-plugin-weather-info",
+        "description": "Get internal informations for plugin weather",
+        "parameters": [],
+        "tags": [
+          "plugin_weather"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/plugin/ipx800v4": {
+      "parameters": [],
+      "get": {
+        "summary": "GET All plugin IPX800V4",
+        "responses": {
+          "200": {
+            "description": "Array of all ipx800v4 objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/plugin_ipx800v4"
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": [
+                      {
+                        "_id": 2031616,
+                        "name": "V4 N°0",
+                        "errorStatus": "0x0000",
+                        "serverName": "192.168.1.97",
+                        "port": 80,
+                        "apikey": "apikey",
+                        "ioDInput": [
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off"
+                        ],
+                        "ioRelays": [
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off"
+                        ],
+                        "ioRelayState": [
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off"
+                        ],
+                        "anaInput": [
+                          25404,
+                          0,
+                          33815,
+                          45622
+                        ],
+                        "ioEnable": "on",
+                        "status": 0
+                      },
+                      {
+                        "_id": 2031617,
+                        "name": "V4 N°1",
+                        "errorStatus": "0x0000",
+                        "serverName": "192.168.1.97",
+                        "port": 80,
+                        "apikey": "apikey",
+                        "ioDInput": [
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off"
+                        ],
+                        "ioRelays": [
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off"
+                        ],
+                        "ioRelayState": [
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off",
+                          "off"
+                        ],
+                        "anaInput": [
+                          25409,
+                          0,
+                          33813,
+                          45627
+                        ],
+                        "ioEnable": "on",
+                        "status": 0
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-plugin-ipx800v4",
+        "description": "# IPX800V4 plugin description\nPlugin ipx800V4 is used to read/write relai, digital input and analog input of an ipx800v4. Just need to inform adress IP and port to enable communication between ipx800v5 and ipx800v4.\n\n### Object internal configuration:\n* **_id**: Unique ID of object \n* **name**: Name of object (used for dependencies auto-name)\n* **errorStatus**: Error code according to object auto check: dependencies, configuration values, etc. (0 if OK) \n* **serverName**: Adress IP or domain name of ipx800v4\n* **port**: Port of ipx800v4\n* **apikey**: Apikey of ipx800v4 (optional) \n\n### Object dependancies: \n* **ioDInput**: Array of 8 values representing state of digital inputs\n* **ioRelays**: Array of 8 values representing relays, set \"on\", \"off\" or \"toggle\" to pilote relays of ipx800v4\n* **ioRelayState**: Array of 8 values representing state of relays \n* **anaInput**: Array of 4 values representing state of analog inputs\n* **ioEnable**: Set \"on\", \"off\" or \"toggle\" to enable/disable polling and control of ipx800v4\n* **status**: Representing state of ipx800v4 connection, according to this enum :\n  * Connected = 0,\n  * Error to send request = 1 ,\n  * Error bad request = 2,\n  * Error bad authentification = 3,\n  * Error access denied = 4,\n  * Error serveur error = 5,\n  * Error no response = 6,\n  * Error parse json response = 7,\n  * Error serveur request = 8,\n  * Error invalid configuration = 9,",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "plugin_ipxv4"
+        ]
+      },
+      "post": {
+        "summary": "CREATE a new plugin IPX800V4",
+        "operationId": "post-api-plugin-ipx800v4",
+        "responses": {
+          "201": {
+            "description": "Created Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/plugin_ipx800v4"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 2031616,
+                      "name": "V4 N°0",
+                      "errorStatus": "0x0000",
+                      "serverName": "192.168.1.97",
+                      "port": 80,
+                      "apikey": "apikey",
+                      "ioDInput": [
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off"
+                      ],
+                      "ioRelays": [
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off"
+                      ],
+                      "ioRelayState": [
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off"
+                      ],
+                      "anaInput": [
+                        25441,
+                        0,
+                        33883,
+                        45582
+                      ],
+                      "ioEnable": "on",
+                      "status": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "tags": [
+          "plugin_ipxv4"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/plugin_ipx800v4"
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "name": "V4 N°0"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Object initial configuration (optional)"
+        },
+        "description": " "
+      }
+    },
+    "/api/plugin/ipx800v4/info": {
+      "get": {
+        "summary": "GET plugin IPX800V4 info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-plugin-ipx800v4-info",
+        "description": "Get internal informations for plugin ipx800v4",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "plugin_ipxv4"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/plugin/ipx800v4/usage": {
+      "get": {
+        "summary": "GET plugin IPX800V4 usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-plugin-ipx800v4-usage",
+        "description": "Get plugin ipx800v4 usage",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "plugin_ipxv4"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/plugin/ipx800v4/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET a plugin IPX800V4",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/plugin_ipx800v4"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 2031616,
+                      "name": "V4 N°0",
+                      "errorStatus": "0x0000",
+                      "serverName": "192.168.1.97",
+                      "port": 80,
+                      "apikey": "apikey",
+                      "ioDInput": [
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off"
+                      ],
+                      "ioRelays": [
+                        "off",
+                        "on",
+                        "off",
+                        "on",
+                        "on",
+                        "on",
+                        "on",
+                        "on"
+                      ],
+                      "ioRelayState": [
+                        "off",
+                        "on",
+                        "off",
+                        "on",
+                        "on",
+                        "on",
+                        "on",
+                        "on"
+                      ],
+                      "anaInput": [
+                        25483,
+                        0,
+                        33847,
+                        45671
+                      ],
+                      "ioEnable": "on",
+                      "status": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-plugin-ipx800v4-id",
+        "description": " Get plugin IPX800V4 object",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "plugin_ipxv4"
+        ]
+      },
+      "put": {
+        "summary": "UPDATE a plugin ipx800v4",
+        "operationId": "put-api-plugin-ipx800v4-id",
+        "responses": {
+          "200": {
+            "description": "Updated object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/plugin_ipx800v4"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 2031616,
+                      "name": "V4 N°0",
+                      "errorStatus": "0x0000",
+                      "serverName": "192.168.1.97",
+                      "port": 80,
+                      "apikey": "apikey",
+                      "ioDInput": [
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off",
+                        "off"
+                      ],
+                      "ioRelays": [
+                        "off",
+                        "on",
+                        "off",
+                        "on",
+                        "on",
+                        "on",
+                        "on",
+                        "on"
+                      ],
+                      "ioRelayState": [
+                        "off",
+                        "on",
+                        "off",
+                        "on",
+                        "on",
+                        "on",
+                        "on",
+                        "on"
+                      ],
+                      "anaInput": [
+                        25483,
+                        0,
+                        33847,
+                        45671
+                      ],
+                      "ioEnable": "on",
+                      "status": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/plugin_ipx800v4"
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "name": "V4 N°0",
+                    "serverName": "192.168.1.87",
+                    "port": 100,
+                    "apikey": "apikey@123",
+                    "ioRelays": [
+                      "off",
+                      "on",
+                      "toggle",
+                      "on",
+                      "on",
+                      "toggle",
+                      "on",
+                      "toggle"
+                    ],
+                    "ioEnable": "toggle"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Object description with new parameters \n* update can be done on partial object\n* some fields are not updatable, there are ignored on PUT"
+        },
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ],
+        "tags": [
+          "plugin_ipxv4"
+        ],
+        "description": " Put a plugin IPX800V4 object"
+      },
+      "delete": {
+        "summary": "DELETE a plugin ipx800v4",
+        "operationId": "delete-api-plugin-ipx800v4-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete IPX800V4 N°1 (ID: 2031617) success."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete IPX800V4 N°1 (ID: 2031617) success."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "plugin_ipxv4"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ],
+        "description": "  Delete a plugin IPX800V4 object"
+      }
+    },
+    "/api/xdevice/xpool&option=filter_id": {
+      "parameters": [],
+      "get": {
+        "summary": "GET All plugin X-POOL",
+        "responses": {
+          "200": {
+            "description": "Array of all ipx800v4 objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/plugin_xpool"
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": [
+                      {
+                        "_id": 5242880,
+                        "name": "XPOOL N°0",
+                        "codeExt": "25000000",
+                        "errorStatus": "0x0000",
+                        "modeFiltration": 0,
+                        "bSmart": false,
+                        "calibrationStatus": 0,
+                        "inputMode1": 1,
+                        "inputMode2": 2,
+                        "inputMode3": 2,
+                        "inputMode4": 2,
+                        "Heater_id": 65578,
+                        "Filtration_id": 65576,
+                        "Light_id": 65577,
+                        "Aux_id": 65579,
+                        "Input Filtr_id": 65580,
+                        "Input Light_id": 65581,
+                        "Input Heater_id": 65582,
+                        "Input Aux_id": 65583,
+                        "Temp Exterior_id": 262196,
+                        "Temp Water_id": 262195,
+                        "Probe PH_id": 262194,
+                        "Probe ORP_id": 262193,
+                        "HeaterCal_id": [
+                          1507328,
+                          1507329,
+                          1507330
+                        ],
+                        "LightPlan_id": 1900544,
+                        "FiltrPlan_id": 1900545,
+                        "Under Ph_id": 65584,
+                        "Upper Ph_id": 65585,
+                        "No Frozte_id": 65586
+                      },
+                      {
+                        "_id": 5242881,
+                        "name": "XPOOL N°1",
+                        "codeExt": "25070707",
+                        "errorStatus": "0x0000",
+                        "modeFiltration": 0,
+                        "bSmart": false,
+                        "calibrationStatus": 0,
+                        "inputMode1": 0,
+                        "inputMode2": 0,
+                        "inputMode3": 0,
+                        "inputMode4": 0,
+                        "Heater_id": 65589,
+                        "Filtration_id": 65587,
+                        "Light_id": 65588,
+                        "Aux_id": 65590,
+                        "Input Filtr_id": 65591,
+                        "Input Light_id": 65592,
+                        "Input Heater_id": 65593,
+                        "Input Aux_id": 65594,
+                        "Temp Exterior_id": 262200,
+                        "Temp Water_id": 262199,
+                        "Probe PH_id": 262198,
+                        "Probe ORP_id": 262197,
+                        "HeaterCal_id": [
+                          1507331,
+                          1507332,
+                          1507333
+                        ],
+                        "LightPlan_id": 1900546,
+                        "FiltrPlan_id": 1900547,
+                        "Under Ph_id": 65595,
+                        "Upper Ph_id": 65596,
+                        "No Frozte_id": 65597
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-xdevice-xpool",
+        "description": "# X-POOL plugin description\nPlugin xpool is used to read/write relai, digital input and analog input of an xpool. \n\n### Object internal configuration:\n* **_id**: Unique ID of object \n* **name**: Name of object (used for dependencies auto-name)\n* **errorStatus**: Error code according to object auto check: dependencies, configuration values, etc. (0 if OK) \n* **modeFiltration**: Change filtration mode (0: Auto, 1: On and 2 : Off)\n* **bSmart**: true for enable smart mode \n* **calibrationStatus**: when calibration is start, status change (0: IDLE, 1 : First calibration is done and 2 : Second calibration is done) \n* **inputMode1**: Mode for input filtration (0: no security, 1 : When input is as 0 filtration is bloqued and 2 : 1 : When input is as 1 filtration is bloqued)\n* **inputMode2**: Mode for input light (0: no action, 1 : When input is as 1 light turn on and 2 : 1 : When input is as 1 light turn off)\n* **inputMode3**: Mode for input heater (0: no action, 1 : When input is as 1 heater turn on and 2 : 1 : When input is as 1 heater turn off)\n* **inputMode4**: Mode for input auxiliary (0: no action, 1 : When input is as 1 auxiliary turn on and 2 : 1 : When input is as 1 auxiliary turn off)\n\n\n### Object dependancies: \n* **Filtration**: Value representing state of relay Filtration\n* **Light**: Value representing state of relay Light\n* **Heater**: Value representing state of relay heater\n* **Aux**: Value representing state of relay Auxiliary\n* **Input Filtr**: Value representing state of digital input of filtration\n* **Input Light**: Value representing state of digital input of Light\n* **Input Heater**: Value representing state of digital input of Heater\n* **Input Aux**: Value representing state of digital input of Auxiliary\n* **Temp Exterior**: Values representing temperature exterior \n* **Temp Water**: Values representing temperature of Water\n* **Probe PH**: Values representing Ph \n* **Probe ORP**: Values representing ORP\n* **Under Ph**: Values representing state of notification under Ph\n* **Upper Ph**: Values representing state of notification Upper Ph\n* **No Frozte**: Values representing state of notification no frozte",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "plugin_xpool"
+        ]
+      }
+    },
+    "/api/xdevice/xpool/scan": {
+      "parameters": [],
+      "post": {
+        "summary": "CREATE a new plugin XPOOL",
+        "operationId": "post-api-xdevice-xpool",
+        "responses": {
+          "201": {
+            "description": "Created Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/plugin_xpool_scan"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "newDeviceFound": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ],
+        "description": " ",
+        "tags": [
+          "plugin_xpool"
+        ]
+      }
+    },
+    "/api/xdevice/xpool/info": {
+      "get": {
+        "summary": "GET plugin XPOOL info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-xdevice-xpool-info",
+        "description": "Get internal informations for plugin xpool",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "plugin_xpool"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/xdevice/xpool/usage": {
+      "get": {
+        "summary": "GET plugin XPOOL usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-xdevice-xpool-usage",
+        "description": "Get plugin xpool usage",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "plugin_xpool"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/xdevice/xpool/{id}&option=filter_id": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET a plugin xpool",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/plugin_xpool"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 5242880,
+                      "name": "XPOOL N°0",
+                      "codeExt": "25000000",
+                      "errorStatus": "0x0000",
+                      "modeFiltration": 0,
+                      "bSmart": false,
+                      "calibrationStatus": 0,
+                      "inputMode1": 1,
+                      "inputMode2": 2,
+                      "inputMode3": 2,
+                      "inputMode4": 2,
+                      "Heater_id": 65578,
+                      "Filtration_id": 65576,
+                      "Light_id": 65577,
+                      "Aux_id": 65579,
+                      "Input Filtr_id": 65580,
+                      "Input Light_id": 65581,
+                      "Input Heater_id": 65582,
+                      "Input Aux_id": 65583,
+                      "Temp Exterior_id": 262196,
+                      "Temp Water_id": 262195,
+                      "Probe PH_id": 262194,
+                      "Probe ORP_id": 262193,
+                      "HeaterCal_id": [
+                        1507328,
+                        1507329,
+                        1507330
+                      ],
+                      "LightPlan_id": 1900544,
+                      "FiltrPlan_id": 1900545,
+                      "Under Ph_id": 65584,
+                      "Upper Ph_id": 65585,
+                      "No Frozte_id": 65586
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-xdevice-xpool-id",
+        "description": " Get plugin IPX800V4 object",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "plugin_xpool"
+        ]
+      },
+      "put": {
+        "summary": "UPDATE a plugin ipx800v4",
+        "operationId": "put-api-xdevice-xpool-id",
+        "responses": {
+          "200": {
+            "description": "Updated object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/plugin_ipx800v4"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 5242880,
+                      "name": "XPOOL test",
+                      "codeExt": "25000000",
+                      "errorStatus": "0x0000",
+                      "modeFiltration": 2,
+                      "bSmart": true,
+                      "calibrationStatus": 0,
+                      "inputMode1": 0,
+                      "inputMode2": 0,
+                      "inputMode3": 1,
+                      "inputMode4": 1,
+                      "Heater_id": 65578,
+                      "Filtration_id": 65576,
+                      "Light_id": 65577,
+                      "Aux_id": 65579,
+                      "Input Filtr_id": 65580,
+                      "Input Light_id": 65581,
+                      "Input Heater_id": 65582,
+                      "Input Aux_id": 65583,
+                      "Temp Exterior_id": 262196,
+                      "Temp Water_id": 262195,
+                      "Probe PH_id": 262194,
+                      "Probe ORP_id": 262193,
+                      "HeaterCal_id": [
+                        1507328,
+                        1507329,
+                        1507330
+                      ],
+                      "LightPlan_id": 1900544,
+                      "FiltrPlan_id": 1900545,
+                      "Under Ph_id": 65584,
+                      "Upper Ph_id": 65585,
+                      "No Frozte_id": 65586
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/plugin_ipx800v4"
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "name": "XPOOL test",
+                    "modeFiltration": 2,
+                    "bSmart": true,
+                    "inputMode1": 0,
+                    "inputMode2": 0,
+                    "inputMode3": 1,
+                    "inputMode4": 1
+                  }
+                }
+              }
+            }
+          },
+          "description": "Object description with new parameters \n* update can be done on partial object\n* some fields are not updatable, there are ignored on PUT"
+        },
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ],
+        "description": " ",
+        "tags": [
+          "plugin_xpool"
+        ]
+      },
+      "delete": {
+        "summary": "DELETE a plugin xpool",
+        "operationId": "delete-api-xdevice-xpool-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete IPX800V4 N°1 (ID: 2031617) success."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete XPOOL N°1 (ID: 2031617) success."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ],
+        "description": " ",
+        "tags": [
+          "plugin_xpool"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "plugin_ipx800v4": {
+        "description": "",
+        "type": "object",
+        "x-examples": {
+          "example-1": {
+            "_id": 2031616,
+            "name": "V4 N°0",
+            "errorStatus": "0x0000",
+            "serverName": "192.168.1.97",
+            "port": 80,
+            "apikey": "apikey",
+            "ioDInput": [
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off"
+            ],
+            "ioRelays": [
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off"
+            ],
+            "ioRelayState": [
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off"
+            ],
+            "anaInput": [
+              25441,
+              0,
+              33883,
+              45582
+            ],
+            "ioEnable": "on",
+            "status": 0
+          }
+        },
+        "properties": {
+          "_id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "errorStatus": {
+            "type": "string",
+            "minLength": 1
+          },
+          "serverName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "port": {
+            "type": "number"
+          },
+          "apikey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ioDInput": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ioRelays": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ioRelayState": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "anaInput": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "ioEnable": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "number"
+          }
+        },
+        "title": "IPX800V4"
+      },
+      "plugin_weather": {
+        "description": "",
+        "type": "object",
+        "x-examples": {
+          "example-1": {
+            "_id": 8454144,
+            "apiKey": "4a44d09b5e36b1bac4da34140238cff4",
+            "bEnable": true,
+            "errorStatus": "0x0000",
+            "strPosition_id": 524288,
+            "ioCurentDayOn": "on",
+            "anaCurentSunrise": 1636530715,
+            "anaCurentSunset": 1636564634,
+            "anaCurentTemp": 11.68,
+            "anaCurentPressure": 1029,
+            "anaCurentHumidity": 87,
+            "anaCurentWindSpeed": 0.89,
+            "anaCurentClouds": 75,
+            "anaCurentLevels": 2,
+            "anaTemp": [
+              20.99,
+              21.47,
+              22.72,
+              23.68,
+              20.89,
+              17.97,
+              20.2
+            ],
+            "anaPressure": [
+              1022,
+              1019,
+              1015,
+              1015,
+              1020,
+              1023,
+              1021
+            ],
+            "anaHumidity": [
+              40,
+              53,
+              41,
+              48,
+              59,
+              34,
+              54
+            ],
+            "anaWindSpeed": [
+              2.5,
+              1.87,
+              2.73,
+              4.53,
+              4.47,
+              2.04,
+              7.35
+            ],
+            "anaClouds": [
+              29,
+              0,
+              100,
+              16,
+              59,
+              100,
+              24
+            ],
+            "anaLevels": [
+              2,
+              0,
+              4,
+              4,
+              4,
+              2,
+              4
+            ]
+          }
+        },
+        "title": "WEATHER",
+        "properties": {
+          "_id": {
+            "type": "number"
+          },
+          "apiKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bEnable": {
+            "type": "boolean"
+          },
+          "errorStatus": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ioCurentDayOn": {
+            "type": "string"
+          },
+          "strPosition_id": {
+            "type": "number"
+          },
+          "anaCurentSunrise": {
+            "type": "number"
+          },
+          "anaCurentSunset": {
+            "type": "number"
+          },
+          "anaCurentTemp": {
+            "type": "number"
+          },
+          "anaCurentPressure": {
+            "type": "number"
+          },
+          "anaCurentHumidity": {
+            "type": "number"
+          },
+          "anaCurentWindSpeed": {
+            "type": "number"
+          },
+          "anaCurentClouds": {
+            "type": "number"
+          },
+          "anaCurentLevels": {
+            "type": "number"
+          },
+          "anaTemp": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "anaPressure": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "anaHumidity": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "anaWindSpeed": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "anaClouds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "anaLevels": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "plugin_xpool_scan": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "integer"
+          },
+          "Heater": {
+            "type": "string"
+          },
+          "Filtration": {
+            "type": "string"
+          },
+          "Light": {
+            "type": "string"
+          },
+          "Aux": {
+            "type": "string"
+          },
+          "Input Filtr": {
+            "type": "string"
+          },
+          "Input Light": {
+            "type": "string"
+          },
+          "Input Heater": {
+            "type": "string"
+          },
+          "Input Aux": {
+            "type": "string"
+          },
+          "Temp Exterior": {
+            "type": "number"
+          },
+          "Temp Water": {
+            "type": "integer"
+          },
+          "Probe PH": {
+            "type": "number"
+          },
+          "Probe ORP": {
+            "type": "integer"
+          },
+          "Under Ph": {
+            "type": "string"
+          },
+          "Upper Ph": {
+            "type": "string"
+          },
+          "No Frozte": {
+            "type": "string"
+          }
+        },
+        "x-examples": {
+          "Example 1": {
+            "newDeviceFound": 0
+          }
+        },
+        "title": "XPOOL SCAN"
+      },
+      "plugin_xpool": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "codeExt": {
+            "type": "string"
+          },
+          "errorStatus": {
+            "type": "string"
+          },
+          "modeFiltration": {
+            "type": "integer"
+          },
+          "bSmart": {
+            "type": "boolean"
+          },
+          "calibrationStatus": {
+            "type": "integer"
+          },
+          "inputMode1": {
+            "type": "integer"
+          },
+          "inputMode2": {
+            "type": "integer"
+          },
+          "inputMode3": {
+            "type": "integer"
+          },
+          "inputMode4": {
+            "type": "integer"
+          },
+          "Heater_id": {
+            "type": "integer"
+          },
+          "Filtration_id": {
+            "type": "integer"
+          },
+          "Light_id": {
+            "type": "integer"
+          },
+          "Aux_id": {
+            "type": "integer"
+          },
+          "Input Filtr_id": {
+            "type": "integer"
+          },
+          "Input Light_id": {
+            "type": "integer"
+          },
+          "Input Heater_id": {
+            "type": "integer"
+          },
+          "Input Aux_id": {
+            "type": "integer"
+          },
+          "Temp Exterior_id": {
+            "type": "integer"
+          },
+          "Temp Water_id": {
+            "type": "integer"
+          },
+          "Probe PH_id": {
+            "type": "integer"
+          },
+          "Probe ORP_id": {
+            "type": "integer"
+          },
+          "HeaterCal_id": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "LightPlan_id": {
+            "type": "integer"
+          },
+          "FiltrPlan_id": {
+            "type": "integer"
+          },
+          "Under Ph_id": {
+            "type": "integer"
+          },
+          "Upper Ph_id": {
+            "type": "integer"
+          },
+          "No Frozte_id": {
+            "type": "integer"
+          }
+        },
+        "x-examples": {
+          "Example 1": {
+            "_id": 5242880,
+            "name": "XPOOL N°0",
+            "codeExt": "25000000",
+            "errorStatus": "0x0000",
+            "modeFiltration": 0,
+            "bSmart": false,
+            "calibrationStatus": 0,
+            "inputMode1": 1,
+            "inputMode2": 2,
+            "inputMode3": 2,
+            "inputMode4": 2,
+            "Heater_id": 65578,
+            "Filtration_id": 65576,
+            "Light_id": 65577,
+            "Aux_id": 65579,
+            "Input Filtr_id": 65580,
+            "Input Light_id": 65581,
+            "Input Heater_id": 65582,
+            "Input Aux_id": 65583,
+            "Temp Exterior_id": 262196,
+            "Temp Water_id": 262195,
+            "Probe PH_id": 262194,
+            "Probe ORP_id": 262193,
+            "HeaterCal_id": [
+              1507328,
+              1507329,
+              1507330
+            ],
+            "LightPlan_id": 1900544,
+            "FiltrPlan_id": 1900545,
+            "Under Ph_id": 65584,
+            "Upper Ph_id": 65585,
+            "No Frozte_id": 65586
+          }
+        },
+        "title": "XPOOL"
+      }
+    },
+    "securitySchemes": {
+      "ApiKey-Level_0": {
+        "name": "ApiKey",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"ApiKey\" created on system by an \"admin\" user and configured with Level 0 (Supervisor)."
+      },
+      "ApiKey-Level_1": {
+        "name": "ApiKey",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"ApiKey\" created on system by an \"admin\" user and configured with Level 1 (User)."
+      },
+      "AuthToken-Level_2": {
+        "name": "AuthToken",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"AuthToken\" obtained by Login with an user account of Level 2 (Operator). \n(cf. login procedure /api/auth/login/:login) "
+      },
+      "AuthToken-Level_3": {
+        "name": "AuthToken",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"AuthToken\" obtained by Login with an user account of Level 3 (Administrator). \n(cf. login procedure /api/auth/login/:login) "
+      },
+      "AuthToken-Level_4": {
+        "name": "AuthToken",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"AuthToken\" obtained by Login with an user account of Level 4 (Root). \n(cf. login procedure /api/auth/login/:login) "
+      }
+    },
+    "responses": {
+      "_info": {
+        "description": "Informations about a collection object :\n* **apiVersion**: version of object API\n* **objVersion**: version of object configuration ",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "apiVersion": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "objVersion": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "apiVersion",
+                "objVersion"
+              ],
+              "x-examples": {
+                "example-1": {
+                  "apiVersion": "1.6",
+                  "objVersion": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "apiVersion": "1.6",
+                  "objVersion": 1
+                }
+              },
+              "example-2": {
+                "value": {
+                  "apiVersion": "3.4",
+                  "objVersion": 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_400": {
+        "description": "Bad request \n\nParameters not required :\n* don't need ID\nInvalid parameters :\n* Invalid ID\n* Invalid numbers (not in range)\n* Invalid string (too long or too small)\n* Missing DATA\n* Invalid json\n* Invalid name\n* Cannot modify reserved resource\n* Cannot set state of system input\n* etc...",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "Status"
+              ],
+              "x-examples": {
+                "example-1": {
+                  "Status": "Don't need ID"
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Don't need ID"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "Invalid ID"
+                }
+              },
+              "example-3": {
+                "value": {
+                  "Status": "Invalid json type",
+                  "GceError": {
+                    "group": "<group number>",
+                    "code": "<code number>"
+                  }
+                }
+              },
+              "example-4": {
+                "value": {
+                  "Status": "Invalid parameter",
+                  "GceError": {
+                    "group": "<group number>",
+                    "code": "<code number>"
+                  }
+                }
+              },
+              "example-5": {
+                "value": {
+                  "Status": "URI Not Found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_401": {
+        "description": "Unauthorized request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "Status"
+              ],
+              "x-examples": {
+                "example-1": {
+                  "Status": "Need AuthToken"
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Need AuthToken"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_403": {
+        "description": "Forbiden\n\n* Need authorization elevation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "Status"
+              ],
+              "x-examples": {
+                "example-1": {
+                  "Status": "Need authorization elevation"
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Need authorization elevation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_404": {
+        "description": "Not found\n\n* Unknown ID\n* URI Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "Status"
+              ],
+              "x-examples": {
+                "example-1": {
+                  "Status": "Unknown ID"
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Unknown ID"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "URI Not Found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_500": {
+        "description": "Internal error\n\nJson error :\n * Failed to init api handler, out of memory\n * Failed to parse object to JSON\n * etc...",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "GceError": {
+                  "type": "object",
+                  "properties": {
+                    "group": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "group",
+                    "code"
+                  ]
+                }
+              },
+              "required": [
+                "Status",
+                "GceError"
+              ],
+              "x-examples": {
+                "example-1": {
+                  "Status": "Failed to init api handler, out of memory",
+                  "GceError": {
+                    "group": "group number",
+                    "code": "code number"
+                  }
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Failed to init api handler, out of memory",
+                  "GceError": {
+                    "group": "group number",
+                    "code": "code number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "weather_object": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/plugin_weather"
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "_id": 8454144,
+                  "apiKey": "4a44d09b5e36b1bac4da34140238cff4",
+                  "bEnable": true,
+                  "errorStatus": "0x0000",
+                  "ioCurentDayOn": "on",
+                  "strPosition_id": 524288,
+                  "anaCurentSunrise": 1636530715,
+                  "anaCurentSunset": 1636564634,
+                  "anaCurentTemp": 11.68,
+                  "anaCurentPressure": 1029,
+                  "anaCurentHumidity": 87,
+                  "anaCurentWindSpeed": 0.89,
+                  "anaCurentClouds": 75,
+                  "anaCurentLevels": 2,
+                  "anaTemp": [
+                    20.99,
+                    21.47,
+                    22.72,
+                    23.68,
+                    20.89,
+                    17.97,
+                    20.2
+                  ],
+                  "anaPressure": [
+                    1022,
+                    1019,
+                    1015,
+                    1015,
+                    1020,
+                    1023,
+                    1021
+                  ],
+                  "anaHumidity": [
+                    40,
+                    53,
+                    41,
+                    48,
+                    59,
+                    34,
+                    54
+                  ],
+                  "anaWindSpeed": [
+                    2.5,
+                    1.87,
+                    2.73,
+                    4.53,
+                    4.47,
+                    2.04,
+                    7.35
+                  ],
+                  "anaClouds": [
+                    29,
+                    0,
+                    100,
+                    16,
+                    59,
+                    100,
+                    24
+                  ],
+                  "anaLevels": [
+                    2,
+                    0,
+                    4,
+                    4,
+                    4,
+                    2,
+                    4
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_507": {
+        "description": "Out of memory",
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Unable to create object, collection is full"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "Unable to link object, list is full"
+                }
+              }
+            }
+          }
+        }
+      },
+      "_usage": {
+        "description": "Usage of a collection of object :\n* **capacity**: Number maximum of object in IPX\n* **usage**: Percentage of object used\n* **used**: Number of object used\n* **usedSubGroup1**: (optional) Number of sub-group object \n* **usedSubGroup2**: (optional) Number of sub-group object \n* **usedSubGroup3**: (optional) Number of sub-group object \n* **usedSubGroup4**: (optional) Number of sub-group object \n* **usedSubGroup5**: (optional) Number of sub-group object \n* **bCorrupted**: Flag to indicate if collection of object is corrupted (invalid flash configuration)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "capacity": 128,
+                  "usage": 7,
+                  "used": 8,
+                  "bCorrupted": false,
+                  "usedSubGroup1": 2,
+                  "usedSubGroup2": 1,
+                  "usedSubGroup4": 4,
+                  "usedSubGroup5": 1
+                }
+              },
+              "properties": {
+                "capacity": {
+                  "type": "number"
+                },
+                "usage": {
+                  "type": "number"
+                },
+                "used": {
+                  "type": "number"
+                },
+                "bCorrupted": {
+                  "type": "boolean"
+                },
+                "usedSubGroup1": {
+                  "type": "number"
+                },
+                "usedSubGroup2": {
+                  "type": "number"
+                },
+                "usedSubGroup4": {
+                  "type": "number"
+                },
+                "usedSubGroup5": {
+                  "type": "number"
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "capacity": 32,
+                  "usage": 101,
+                  "used": 32,
+                  "bCorrupted": false
+                }
+              },
+              "example-2": {
+                "value": {
+                  "capacity": 4096,
+                  "usage": 7,
+                  "used": 271,
+                  "bCorrupted": false,
+                  "usedSubGroup1": 21
+                }
+              },
+              "example-3": {
+                "value": {
+                  "capacity": 128,
+                  "usage": 7,
+                  "used": 8,
+                  "bCorrupted": false,
+                  "usedSubGroup1": 2,
+                  "usedSubGroup2": 1,
+                  "usedSubGroup4": 4,
+                  "usedSubGroup5": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "plugin_ipxv4"
+    },
+    {
+      "name": "plugin_weather"
+    },
+    {
+      "name": "plugin_xpool"
+    }
+  ]
+}

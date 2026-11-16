@@ -1,0 +1,4935 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "IPX 800 V5 API Core",
+    "version": "1.0",
+    "contact": {
+      "email": "dev@gce-electronics.com",
+      "name": "GCE Electronics"
+    },
+    "description": "This is a document to describe core API requests to manage your IPX 800 V5."
+  },
+  "servers": [
+    {
+      "url": "http://192.168.1.54",
+      "description": "my-ipx800-v5"
+    }
+  ],
+  "paths": {
+    "/api/core/io": {
+      "get": {
+        "summary": "GET all IOs",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/io_all"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-io",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ],
+        "description": "Recover a table of all IOs in IPX (config + state)\n\n    {\n        \"_id\": 65577,\n        \"name\": \"[Thermostat USER]No Frost\",\n        \"link0\": 0,\n        \"link1\": 1638400,\n        \"virtual\": false,\n        \"on\": false\n    }",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_io"
+        ]
+      },
+      "post": {
+        "summary": "CREATE an IO",
+        "operationId": "post-api-core-io",
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/object_io"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 1234567,
+                      "name": "Virtual IO n°0",
+                      "link0": 1234567,
+                      "link1": 1234567,
+                      "on": true
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "toggle",
+                    "maxLength": 32,
+                    "minLength": 0,
+                    "description": "Updated name of the IO"
+                  },
+                  "link0": {
+                    "type": "integer",
+                    "example": 65667,
+                    "description": "Updated link0 to bind this IO with input of other object"
+                  },
+                  "link1": {
+                    "type": "integer",
+                    "example": 47230,
+                    "description": "Updated link0 to bind this IO with output of other object"
+                  }
+                }
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "name": "toggle",
+                    "link0": 65667,
+                    "link1": 47230
+                  }
+                },
+                "example-2": {
+                  "value": {
+                    "name": "toggle"
+                  }
+                },
+                "example-3": {
+                  "value": {
+                    "link0": 65667
+                  }
+                }
+              }
+            }
+          },
+          "description": "It is possible to init new IO object with a body. \nOnly name, link0 and link1 will be updated"
+        },
+        "description": "Create new IO in IPX with or without parameters ",
+        "parameters": [],
+        "tags": [
+          "core_io"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/io/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "integer",
+            "format": "int32",
+            "default": 1
+          },
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "ID provided by IPX when this object was created"
+        }
+      ],
+      "put": {
+        "summary": "UPDATE an IO",
+        "operationId": "put-api-core-io-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "type": "object",
+                  "x-examples": {
+                    "example-1": {
+                      "_id": 65536,
+                      "name": "[IPX]Relay 1",
+                      "link0": 0,
+                      "link1": 12648448,
+                      "virtual": false,
+                      "on": false
+                    }
+                  },
+                  "properties": {
+                    "_id": {
+                      "type": "number"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "link0": {
+                      "type": "number"
+                    },
+                    "link1": {
+                      "type": "number"
+                    },
+                    "virtual": {
+                      "type": "boolean"
+                    },
+                    "on": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "_id",
+                    "virtual",
+                    "on"
+                  ]
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 1234567,
+                      "name": "Virtual IO n°0",
+                      "link0": 1234567,
+                      "link1": 1234567,
+                      "virtual": true,
+                      "on": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "filter_name",
+                "filter_state",
+                "filter_config"
+              ],
+              "example": "filter_state"
+            },
+            "in": "query",
+            "name": "option",
+            "description": "Filter the expected response (optional)"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "toggle",
+                    "description": "Update name of the IO"
+                  },
+                  "on": {
+                    "type": "boolean",
+                    "description": "Updated value of the IO"
+                  }
+                }
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "name": "New name"
+                  }
+                },
+                "example-2": {
+                  "value": {
+                    "on": true
+                  }
+                },
+                "example-3": {
+                  "value": {
+                    "on": false
+                  }
+                }
+              }
+            }
+          },
+          "description": "In order to modify an IO, the element to be modified must be indicated in the body.\nOnly name and on can be changed."
+        },
+        "description": "Update IO with ID {id}",
+        "tags": [
+          "core_io"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "GET an IO",
+        "operationId": "get-api-core-io-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/io"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "description": "Get IO with ID {id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ],
+        "tags": [
+          "core_io"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE an IO",
+        "operationId": "delete-api-core-io-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete Virtual IO n°0 (ID: 16384) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete Virtual IO n°0 (ID: 16384) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "description": "Delete IO with ID {id}",
+        "tags": [
+          "core_io"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/io/info": {
+      "get": {
+        "summary": "GET IO info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-io-info",
+        "description": "Get internal informations for IO component",
+        "tags": [
+          "core_io"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/io/usage": {
+      "get": {
+        "summary": "GET IO usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-io-usage",
+        "description": "Get IO usage",
+        "tags": [
+          "core_io"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana": {
+      "get": {
+        "summary": "GET all Analog",
+        "tags": [
+          "core_analog"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana",
+        "description": "Recover a table of all ANAs in IPX (config + state)",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      }
+    },
+    "/api/core/ana/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "integer"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "ID provided by IPX when this object was created"
+        }
+      ],
+      "get": {
+        "summary": "GET an ANA",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-id",
+        "description": "Get Ana with ID {id} (ana8, ana16 or ana32)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ],
+        "tags": [
+          "core_analog"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE an ANA",
+        "operationId": "put-api-core-ana-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "description": "Udpate Ana with ID {id} (ana8, ana16 or ana32)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_ana"
+              },
+              "examples": {}
+            }
+          },
+          "description": "In order to modify an Ana, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE an ANA",
+        "operationId": "delete-api-core-ana-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete Virtual Ana n°0 (ID: 16384) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete Virtual Ana n°0 (ID: 16384) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "description": "Delete Ana with ID {id} (ana8, ana16 or ana32)",
+        "tags": [
+          "core_analog"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/ana/ana8": {
+      "get": {
+        "summary": "GET all Analog 8",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana8_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana8",
+        "description": "Recover a table of all ANA8s in IPX (config + state)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ],
+        "tags": [
+          "core_analog"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "parameters": [],
+      "post": {
+        "summary": "CREATE an Analog 8",
+        "operationId": "post-api-core-ana-ana8",
+        "responses": {
+          "201": {
+            "description": "Created virtual ANA8",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/object_ana"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 196618,
+                      "link0": 0,
+                      "link1": 0,
+                      "name": "Virtual ANA8 N°10",
+                      "unit": "REAL",
+                      "nbdecimal": 2,
+                      "virtual": true,
+                      "value": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "description": "Create new ANA8 in IPX with or without parameters ",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_ana"
+              },
+              "examples": {}
+            }
+          },
+          "description": "It is possible to init new ANA8 object with a body. \nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/ana/ana8/info": {
+      "get": {
+        "summary": "GET Analog 8 info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana8-info",
+        "description": "Get internal informations for ANA8 component",
+        "parameters": [],
+        "tags": [
+          "core_analog"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana/ana8/usage": {
+      "get": {
+        "summary": "GET Analog 8 usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana8-usage",
+        "description": "Get ANA8 usage",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_analog"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana/ana8/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET an Analog 8",
+        "tags": [
+          "core_analog"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana8-id",
+        "description": "Get Ana8 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE an Analog 8",
+        "operationId": "put-api-core-ana-ana8-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "description": "Udpate Ana8 with ID {id}",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_ana"
+              }
+            }
+          },
+          "description": "In order to modify an Ana, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE an Analog 8",
+        "operationId": "delete-api-core-ana-ana8-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Cannot deleted used resource"
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete ANA8 N°48 (ID: 196656) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "description": "Delete Ana8 with ID {id}",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/ana/ana16": {
+      "get": {
+        "summary": "GET all Analog 16",
+        "tags": [
+          "core_analog"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana16_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana16",
+        "description": "Recover a table of all ANA16s in IPX (config + state)",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "post": {
+        "summary": "CREATE a new  Analog 16",
+        "operationId": "post-api-core-ana-ana16",
+        "responses": {
+          "201": {
+            "description": "Created virtual ANA16",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/object_ana"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 262252,
+                      "link0": 0,
+                      "link1": 0,
+                      "name": "Virtual ANA16 N°108",
+                      "unit": "REAL",
+                      "nbdecimal": 2,
+                      "virtual": true,
+                      "value": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_ana"
+              },
+              "examples": {}
+            }
+          },
+          "description": "It is possible to init new ANA16 object with a body. \nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "description": "Create new ANA16 in IPX with or without parameters ",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/ana/ana16/info": {
+      "get": {
+        "summary": "GET Analog 16 info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana16-info",
+        "description": "Get internal informations for ANA16 component",
+        "parameters": [],
+        "tags": [
+          "core_analog"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana/ana16/usage": {
+      "get": {
+        "summary": "GET Analog 16 usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana16-usage",
+        "description": "Get ANA16 usage",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_analog"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana/ana16/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET an Analog 16",
+        "tags": [
+          "core_analog"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana16-id",
+        "description": "Get Ana16 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE an Analog 16",
+        "operationId": "put-api-core-ana-ana16-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_ana"
+              },
+              "examples": {}
+            }
+          },
+          "description": "In order to modify an Ana, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "description": "Udpate Ana16 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE an Analog 16",
+        "operationId": "delete-api-core-ana-ana16-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete ANA16 N°85 (ID: 262229) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete ANA16 N°85 (ID: 262229) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "description": "Delete Ana16 with ID {id}",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/ana/ana32": {
+      "get": {
+        "summary": "GET all Analog 32",
+        "tags": [
+          "core_analog"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana32_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana32",
+        "description": "Recover a table of all ANA32s in IPX (config + state)",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "post": {
+        "summary": "CREATE a new Analog 32",
+        "operationId": "post-api-core-ana-ana32",
+        "responses": {
+          "201": {
+            "description": "Created virtual ANA32",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/object_ana"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 327720,
+                      "link0": 0,
+                      "link1": 0,
+                      "name": "Virtual ANA32 N°40",
+                      "unit": "REAL",
+                      "nbdecimal": 2,
+                      "virtual": true,
+                      "value": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "description": "Create new ANA32 in IPX with or without parameters ",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_ana"
+              }
+            }
+          },
+          "description": "It is possible to init new ANA32 object with a body. \nOnly the ID and links cannot be changed."
+        },
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/ana/ana32/info": {
+      "get": {
+        "summary": "GET ANA32 info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana32-info",
+        "description": "Get internal informations for ANA32 component",
+        "parameters": [],
+        "tags": [
+          "core_analog"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana/ana32/usage": {
+      "get": {
+        "summary": "GET ANA32 usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana32-usage",
+        "description": "Get Analog 32 usage",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_analog"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana/ana32/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET an Analog 32",
+        "tags": [
+          "core_analog"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-ana32-id",
+        "description": "Get Ana32 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE an Analog 32",
+        "operationId": "put-api-core-ana-ana32-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ana_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_ana"
+              },
+              "examples": {}
+            }
+          },
+          "description": "In order to modify an Ana, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "description": "Udpate Ana32 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE an Analog 32",
+        "operationId": "delete-api-core-ana-ana32-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete ANA32 N°13 (ID: 327693) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete ANA32 N°13 (ID: 327693) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_analog"
+        ],
+        "description": "Delete Ana32 with ID {id}",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/ana/unit": {
+      "get": {
+        "summary": "GET all Unit",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "_id",
+                      "_num",
+                      "unit"
+                    ],
+                    "properties": {
+                      "_id": {
+                        "type": "number"
+                      },
+                      "_num": {
+                        "type": "number"
+                      },
+                      "unit": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "x-examples": {
+                    "example-1": [
+                      {
+                        "_id": 393216,
+                        "_num": 0,
+                        "unit": "REAL"
+                      },
+                      {
+                        "_id": 393217,
+                        "_num": 1,
+                        "unit": "RAW"
+                      }
+                    ]
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": [
+                      {
+                        "_id": 393216,
+                        "_num": 0,
+                        "unit": "REAL"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-unit",
+        "description": "Recover a table of all unit in IPX ",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "analog_unit"
+        ]
+      },
+      "post": {
+        "summary": "CREATE a new unit",
+        "operationId": "post-api-core-ana-unit",
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "number"
+                    },
+                    "_num": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "_id",
+                    "_num",
+                    "unit"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "_id": 393236,
+                      "_num": 20,
+                      "unit": "REAL"
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 393236,
+                      "_num": 20,
+                      "unit": "REAL"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "description": "Create new unit in IPX with or without parameters ",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "",
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "number"
+                  },
+                  "_num": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "_id",
+                  "_num",
+                  "unit"
+                ],
+                "x-examples": {
+                  "example-1": {
+                    "_id": 393236,
+                    "_num": 20,
+                    "unit": "REAL"
+                  }
+                }
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "_id": 393236,
+                    "_num": 20,
+                    "unit": "REAL"
+                  }
+                }
+              }
+            }
+          },
+          "description": "It is possible to init new unit object with a body. \nOnly unit can be changed."
+        },
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ],
+        "tags": [
+          "analog_unit"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana/unit/info": {
+      "get": {
+        "summary": "GET Unit info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-unit-info",
+        "description": "Get internal informations for unit",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "analog_unit"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana/unit/usage": {
+      "get": {
+        "summary": "GET Unit usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-unit-usage",
+        "description": "Get unit usage",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "analog_unit"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/ana/unit/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET an Unit",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "number"
+                    },
+                    "_num": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "_id",
+                    "_num",
+                    "unit"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "_id": 393216,
+                      "_num": 0,
+                      "unit": "REAL"
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 393216,
+                      "_num": 0,
+                      "unit": "REAL"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-ana-unit-id",
+        "description": "Get unit with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "analog_unit"
+        ]
+      },
+      "put": {
+        "summary": "UPDATE an Unit",
+        "operationId": "put-api-core-ana-unit-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "number"
+                    },
+                    "_num": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "_id",
+                    "_num",
+                    "unit"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "_id": 393236,
+                      "_num": 20,
+                      "unit": "degre"
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 393236,
+                      "_num": 20,
+                      "unit": "degre"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "",
+                "type": "object",
+                "properties": {
+                  "unit": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "unit"
+                ],
+                "x-examples": {
+                  "example-1": {
+                    "unit": "degre"
+                  }
+                }
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "unit": "degre"
+                  }
+                }
+              }
+            }
+          },
+          "description": "It is possible to init new unit object with a body. \nOnly unit can be changed."
+        },
+        "description": "Udpate unit with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ],
+        "tags": [
+          "analog_unit"
+        ]
+      },
+      "delete": {
+        "summary": "DELETE an Unit",
+        "operationId": "delete-api-core-ana-unit-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete Unit N°20 (ID: 393236) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete Unit N°20 (ID: 393236) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "description": "Delete unit with ID {id}",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ],
+        "tags": [
+          "analog_unit"
+        ]
+      }
+    },
+    "/api/core/str": {
+      "get": {
+        "summary": "GET all String",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str",
+        "description": "Recover a table of all STRs in IPX (config + state)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ],
+        "tags": [
+          "core_string"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "integer"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "ID provided by IPX when this object was created"
+        }
+      ],
+      "get": {
+        "summary": "GET a String",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-id",
+        "description": "Get STR with ID {id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ],
+        "tags": [
+          "core_string"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE a String",
+        "operationId": "put-api-core-str-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "description": "Update STR with ID {id}",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              }
+            }
+          },
+          "description": "In order to modify an Str, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_string"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE a String",
+        "operationId": "delete-api-core-str-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete Virtual Ana n°0 (ID: 16384) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete Str n°0 (ID: 16384) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "description": "Delete STR with ID {id}",
+        "tags": [
+          "core_string"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/str/str32": {
+      "get": {
+        "summary": "GET all String 32",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str32",
+        "description": "Recover a table of all STR32s in IPX (config + state)",
+        "tags": [
+          "core_string"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "post": {
+        "summary": "CREATE a String 32",
+        "operationId": "post-api-core-str-str32",
+        "responses": {
+          "201": {
+            "description": "Created virtual STR32",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/object_str"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 524289,
+                      "link0": 0,
+                      "link1": 0,
+                      "name": "Virtual STR32 N°1",
+                      "value": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "description": "Create new str32 in IPX with or without parameters ",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              }
+            }
+          },
+          "description": "It is possible to init new str32 object with a body. \nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_string"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str32/info": {
+      "get": {
+        "summary": "GET STR32 info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str32-info",
+        "description": "Get internal informations for STR32 component",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str32/usage": {
+      "get": {
+        "summary": "GET STR32 usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str32-usage",
+        "description": "Get String 32 usage",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str32/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET a String 32",
+        "tags": [
+          "core_string"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str32-id",
+        "description": "Get STR32 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE a String 32",
+        "operationId": "put-api-core-str-str32-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              },
+              "examples": {}
+            }
+          },
+          "description": "In order to modify an Str, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Update STR32 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE a String 32",
+        "operationId": "delete-api-core-str-str32-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete STR32 N°49 (ID: 524337) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete STR32 N°49 (ID: 524337) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Delete STR32 with ID {id}",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/str/str64": {
+      "get": {
+        "summary": "GET all String 64",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str64",
+        "description": "Recover a table of all STR64s in IPX (config + state)",
+        "tags": [
+          "core_string"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "post": {
+        "summary": "CREATE a String 64",
+        "operationId": "post-api-core-str-str64",
+        "responses": {
+          "201": {
+            "description": "Created virtual STR64",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/object_str"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 589827,
+                      "link0": 0,
+                      "link1": 0,
+                      "name": "Virtual STR64 N°3",
+                      "value": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "description": "Create new str64 in IPX with or without parameters ",
+        "tags": [
+          "core_string"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              }
+            }
+          },
+          "description": "It is possible to init new str64 object with a body. \nOnly the ID and links cannot be changed."
+        },
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str64/info": {
+      "get": {
+        "summary": "GET STR64 info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str64-info",
+        "description": "Get internal informations for STR64 component",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str64/usage": {
+      "get": {
+        "summary": "GET STR64 usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str64-usage",
+        "description": "Get String 64 usage",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str64/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET a String 64",
+        "tags": [
+          "core_string"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str64-id",
+        "description": "Get STR64 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE a String 64",
+        "operationId": "put-api-core-str-str64-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              },
+              "examples": {}
+            }
+          },
+          "description": "In order to modify an Str, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Update STR64 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE a String 64",
+        "operationId": "delete-api-core-str-str64-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete STR64 N°9 (ID: 589833) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete STR64 N°9 (ID: 589833) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Delete STR64 with ID {id}",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/str/str128": {
+      "get": {
+        "summary": "GET all String 128",
+        "tags": [
+          "core_string"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str128",
+        "description": "Recover a table of all STR128s in IPX (config + state)",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "post": {
+        "summary": "CREATE a new String 128",
+        "operationId": "post-api-core-str-str128",
+        "responses": {
+          "201": {
+            "description": "Created virtual STR128",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "x-examples": {
+                    "example-1": {
+                      "_id": 655360,
+                      "link0": 0,
+                      "link1": 0,
+                      "name": "new name",
+                      "value": "new value"
+                    }
+                  },
+                  "$ref": ""
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 655360,
+                      "link0": 0,
+                      "link1": 0,
+                      "name": "Virtual STR128 N°0",
+                      "value": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              },
+              "examples": {}
+            }
+          },
+          "description": "It is possible to init new str64 object with a body. \nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Create new str64 in IPX with or without parameters ",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/str/str128/info": {
+      "get": {
+        "summary": "GET STR128 info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str128-info",
+        "description": "Get internal informations for STR128 component",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str128/usage": {
+      "get": {
+        "summary": "GET STR128 usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str128-usage",
+        "description": "Get String 128 usage",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str128/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET a String 128",
+        "tags": [
+          "core_string"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str128-id",
+        "description": "Get STR128 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE a String 128",
+        "operationId": "put-api-core-str-str128-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              },
+              "examples": {}
+            }
+          },
+          "description": "In order to modify an Str, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Update STR128 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE a String 128",
+        "operationId": "delete-api-core-str-str128-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete STR128 N°0 (ID: 655360) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete STR128 N°0 (ID: 655360) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Delete STR128 with ID {id}",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/str/str256": {
+      "get": {
+        "summary": "GET all String 256",
+        "tags": [
+          "core_string"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str256",
+        "description": "Recover a table of all STR256s in IPX (config + state)",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "post": {
+        "summary": "CREATE a new String 256",
+        "operationId": "post-api-core-str-str256",
+        "responses": {
+          "201": {
+            "description": "Created virtual STR256",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/object_str"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 720896,
+                      "link0": 0,
+                      "link1": 0,
+                      "name": "Virtual STR256 N°0",
+                      "value": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              },
+              "examples": {}
+            }
+          },
+          "description": "It is possible to init new str256 object with a body. \nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Create new str256 in IPX with or without parameters ",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/str/str256/info": {
+      "get": {
+        "summary": "GET STR256 info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str256-info",
+        "description": "Get internal informations for STR256 component",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str256/usage": {
+      "get": {
+        "summary": "GET STR256 usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str256-usage",
+        "description": "Get String 256 usage",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str256/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET a String 256",
+        "tags": [
+          "core_string"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str256-id",
+        "description": "Get STR256 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE a String 256",
+        "operationId": "put-api-core-str-str256-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_string"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              },
+              "examples": {}
+            }
+          },
+          "description": "In order to modify an Str, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "description": "Update STR256 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE a String 256",
+        "operationId": "delete-api-core-str-str256-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete STR256 N°6 (ID: 720902) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete STR256 N°6 (ID: 720902) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Delete STR256 with ID {id}",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/core/str/str512": {
+      "get": {
+        "summary": "GET all String 512",
+        "tags": [
+          "core_string"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object_list"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str512",
+        "description": "Recover a table of all STR512s in IPX (config + state)",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "post": {
+        "summary": "CREATE a new String 512",
+        "operationId": "post-api-core-str-str512",
+        "responses": {
+          "201": {
+            "description": "Created virtual STR512",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/object_str"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "_id": 786436,
+                      "link0": 0,
+                      "link1": 0,
+                      "name": "Virtual STR512 N°4",
+                      "value": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          },
+          "507": {
+            "$ref": "#/components/responses/Error_507"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              },
+              "examples": {}
+            }
+          },
+          "description": "It is possible to init new str512 object with a body. \nOnly the ID and links cannot be changed."
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Create new str512 in IPX with or without parameters ",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str512/info": {
+      "get": {
+        "summary": "GET STR512 info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str512-info",
+        "description": "Get internal informations for STR512 component",
+        "parameters": [],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str512/usage": {
+      "get": {
+        "summary": "GET STR512 usage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_usage"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str512-usage",
+        "description": "Get String 512 usage",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "tags": [
+          "core_string"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/core/str/str512/{id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "GET a String 512",
+        "tags": [
+          "core_string"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-core-str-str512-id",
+        "description": "Get STR512 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/option"
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE a String 512",
+        "operationId": "put-api-core-str-str512-id",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/str_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_string"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/object_str"
+              },
+              "examples": {}
+            }
+          },
+          "description": "In order to modify an Str, the element to be modified must be indicated in the body.\nOnly the ID and links cannot be changed."
+        },
+        "description": "Update STR512 with ID {id}",
+        "security": [
+          {
+            "ApiKey-Level_1": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "DELETE a String 512",
+        "operationId": "delete-api-core-str-str512-id",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "des",
+                  "type": "object",
+                  "properties": {
+                    "Status": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "Status"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "Status": "Delete STR256 N°6 (ID: 720902) succes."
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "Status": "Delete STR256 N°6 (ID: 720902) succes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "tags": [
+          "core_string"
+        ],
+        "description": "Delete STR512 with ID {id}",
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "object_io": {
+        "title": "object_io",
+        "type": "object",
+        "x-examples": {
+          "example-virtual": {
+            "value": {
+              "_id": 1234567,
+              "name": "Virtual IO n°0",
+              "link0": 1234567,
+              "link1": 1234567,
+              "on": true
+            }
+          },
+          "example-system": {
+            "value": {
+              "_id": 65536,
+              "name": "[IPX]Relay cmd 1",
+              "link0": 10485760,
+              "link1": 12648448,
+              "virtual": false,
+              "on": false
+            }
+          },
+          "example-object": {
+            "value": {
+              "_id": 65578,
+              "name": "[COUNTER N°0]Inc +",
+              "link0": 10485762,
+              "link1": 1245184,
+              "virtual": false,
+              "on": false
+            }
+          }
+        },
+        "properties": {
+          "_id": {
+            "type": "integer",
+            "example": 1234567,
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Virtual IO n°0"
+          },
+          "link0": {
+            "type": "integer",
+            "example": 1234567
+          },
+          "link1": {
+            "type": "integer",
+            "example": 1234567
+          },
+          "virtual": {
+            "type": "boolean"
+          },
+          "on": {
+            "type": "boolean"
+          }
+        }
+      },
+      "object_ana": {
+        "description": "Update an ana ",
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "number"
+          },
+          "link0": {
+            "type": "number"
+          },
+          "link1": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "nbdecimal": {
+            "type": "number"
+          },
+          "virtual": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "_id",
+          "link0",
+          "link1",
+          "name",
+          "unit",
+          "nbdecimal",
+          "virtual",
+          "value"
+        ],
+        "x-examples": {
+          "example-1": {
+            "_id": 196608,
+            "link0": 8454144,
+            "link1": 0,
+            "name": "[WEATHER]Sunrise day",
+            "unit": "h",
+            "nbdecimal": 0,
+            "virtual": false,
+            "value": {
+              "_id": 196608,
+              "link0": 8454144,
+              "link1": 0,
+              "name": "[WEATHER]Sunrise day",
+              "unit": "h",
+              "nbdecimal": 0,
+              "virtual": false,
+              "value": 7
+            }
+          }
+        },
+        "title": "object_ana"
+      },
+      "object_str": {
+        "description": "Update an str",
+        "type": "object",
+        "x-examples": {
+          "example-1": {
+            "_id": 524288,
+            "link0": 0,
+            "link1": 8454144,
+            "name": "[WEATHER]GPS position",
+            "value": {
+              "_id": 524288,
+              "link0": 0,
+              "link1": 8454144,
+              "name": "[WEATHER]GPS position",
+              "value": "48.856614, 2.3522219"
+            }
+          }
+        },
+        "title": "object_str",
+        "properties": {
+          "_id": {
+            "type": "number",
+            "readOnly": true
+          },
+          "link0": {
+            "type": "number"
+          },
+          "link1": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "_id",
+          "link0",
+          "link1",
+          "name",
+          "value"
+        ]
+      }
+    },
+    "responses": {
+      "io_all": {
+        "description": "Array of all IO object (sytem + virtual)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "array",
+              "x-examples": {
+                "example-1": {
+                  "_id": 65536,
+                  "name": "[IPX]Relay cmd 1",
+                  "link0": 10485760,
+                  "link1": 12648448,
+                  "virtual": false,
+                  "on": false
+                }
+              },
+              "items": {
+                "$ref": "#/components/schemas/object_io"
+              }
+            },
+            "examples": {
+              "example-3": {
+                "value": [
+                  {
+                    "_id": 1234567,
+                    "name": "Virtual IO n°0",
+                    "link0": 1234567,
+                    "link1": 1234567,
+                    "virtual": true,
+                    "on": true
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "io": {
+        "description": "IO object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/object_io"
+            },
+            "examples": {
+              "example-virtual": {
+                "value": {
+                  "_id": 65805,
+                  "name": "Virtual IO N°269",
+                  "link0": 0,
+                  "link1": 0,
+                  "virtual": true,
+                  "on": false
+                }
+              },
+              "example-system": {
+                "value": {
+                  "_id": 65536,
+                  "name": "[IPX]Relay cmd 1",
+                  "link0": 10485760,
+                  "link1": 12648448,
+                  "virtual": false,
+                  "on": false
+                }
+              },
+              "example-object": {
+                "value": {
+                  "_id": 65578,
+                  "name": "[COUNTER N°0]Inc +",
+                  "link0": 10485762,
+                  "link1": 1245184,
+                  "virtual": false,
+                  "on": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "ana_object": {
+        "description": "ANA Object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/object_ana"
+            },
+            "examples": {
+              "example-system": {
+                "value": {
+                  "_id": 262144,
+                  "link0": 12713984,
+                  "link1": 0,
+                  "name": "[IPX]Analog input 1",
+                  "unit": "RAW",
+                  "nbdecimal": 0,
+                  "virtual": false,
+                  "value": 0
+                }
+              },
+              "example-plugin": {
+                "value": {
+                  "_id": 262161,
+                  "link0": 8454144,
+                  "link1": 0,
+                  "name": "[WEATHER]Temperature day",
+                  "unit": "°C",
+                  "nbdecimal": 2,
+                  "virtual": false,
+                  "value": 0
+                }
+              },
+              "example-object": {
+                "value": {
+                  "_id": 262204,
+                  "link0": 13631488,
+                  "link1": 0,
+                  "name": "[DELAY N°0]Countdown",
+                  "unit": "S",
+                  "nbdecimal": 0,
+                  "virtual": false,
+                  "value": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "ana_object_list": {
+        "description": "Array of all ANA (sytem + virtual)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/object_ana"
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": [
+                  {
+                    "_id": 0,
+                    "link0": 0,
+                    "link1": 0,
+                    "name": "string",
+                    "unit": "string",
+                    "nbdecimal": 0,
+                    "virtual": true,
+                    "value": 0
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "str_object": {
+        "description": "STR Object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/object_str"
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "_id": 786432,
+                  "link0": 0,
+                  "link1": 1179648,
+                  "name": "[MAIL N°0]Mail ON",
+                  "value": "Test ON"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "_id": 524288,
+                  "link0": 0,
+                  "link1": 8454144,
+                  "name": "[WEATHER]GPS position",
+                  "value": "48.856614, 2.3522219"
+                }
+              },
+              "example-3": {
+                "value": {
+                  "_id": 589826,
+                  "link0": 0,
+                  "link1": 13631489,
+                  "name": "[Contact]New contact",
+                  "value": "contact@email.com"
+                }
+              }
+            }
+          }
+        }
+      },
+      "str_object_list": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "description": "",
+              "minItems": 1,
+              "uniqueItems": true,
+              "x-examples": {
+                "example-1": [
+                  {
+                    "_id": 524288,
+                    "link0": 0,
+                    "link1": 8454144,
+                    "name": "[WEATHER]GPS position",
+                    "value": "48.856614, 2.3522219"
+                  }
+                ]
+              },
+              "items": {
+                "$ref": "#/components/schemas/object_str"
+              }
+            },
+            "examples": {
+              "example-3": {
+                "value": [
+                  {
+                    "_id": 0,
+                    "link0": 0,
+                    "link1": 0,
+                    "name": "string",
+                    "value": "string"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "ana8_object_list": {
+        "description": "Array of all ANA8 (sytem + virtual)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/object_ana"
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": [
+                  {
+                    "_id": 0,
+                    "link0": 0,
+                    "link1": 0,
+                    "name": "string",
+                    "unit": "string",
+                    "nbdecimal": 0,
+                    "virtual": true,
+                    "value": 0
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "ana16_object_list": {
+        "description": "Array of all ANA16 (sytem + virtual)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/object_ana"
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": [
+                  {
+                    "_id": 0,
+                    "link0": 0,
+                    "link1": 0,
+                    "name": "string",
+                    "unit": "string",
+                    "nbdecimal": 0,
+                    "virtual": true,
+                    "value": 0
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "ana32_object_list": {
+        "description": "Array of all ANA32 (sytem + virtual)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/object_ana"
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": [
+                  {
+                    "_id": 0,
+                    "link0": 0,
+                    "link1": 0,
+                    "name": "string",
+                    "unit": "string",
+                    "nbdecimal": 0,
+                    "virtual": true,
+                    "value": 0
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "_usage": {
+        "description": "Usage of a collection of object :\n* **capacity**: Number maximum of object in IPX\n* **usage**: Percentage of object used\n* **used**: Number of object used\n* **usedSubGroup1**: (optional) Number of sub-group object \n* **usedSubGroup2**: (optional) Number of sub-group object \n* **usedSubGroup3**: (optional) Number of sub-group object \n* **usedSubGroup4**: (optional) Number of sub-group object \n* **usedSubGroup5**: (optional) Number of sub-group object \n* **bCorrupted**: Flag to indicate if collection of object is corrupted (invalid flash configuration)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "capacity": 128,
+                  "usage": 7,
+                  "used": 8,
+                  "bCorrupted": false,
+                  "usedSubGroup1": 2,
+                  "usedSubGroup2": 1,
+                  "usedSubGroup4": 4,
+                  "usedSubGroup5": 1
+                }
+              },
+              "properties": {
+                "capacity": {
+                  "type": "number"
+                },
+                "usage": {
+                  "type": "number"
+                },
+                "used": {
+                  "type": "number"
+                },
+                "bCorrupted": {
+                  "type": "boolean"
+                },
+                "usedSubGroup1": {
+                  "type": "number"
+                },
+                "usedSubGroup2": {
+                  "type": "number"
+                },
+                "usedSubGroup4": {
+                  "type": "number"
+                },
+                "usedSubGroup5": {
+                  "type": "number"
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "capacity": 32,
+                  "usage": 101,
+                  "used": 32,
+                  "bCorrupted": false
+                }
+              },
+              "example-2": {
+                "value": {
+                  "capacity": 4096,
+                  "usage": 7,
+                  "used": 271,
+                  "bCorrupted": false,
+                  "usedSubGroup1": 21
+                }
+              },
+              "example-3": {
+                "value": {
+                  "capacity": 128,
+                  "usage": 7,
+                  "used": 8,
+                  "bCorrupted": false,
+                  "usedSubGroup1": 2,
+                  "usedSubGroup2": 1,
+                  "usedSubGroup4": 4,
+                  "usedSubGroup5": 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "_info": {
+        "description": "Informations about a collection object :\n* **apiVersion**: version of object API\n* **objVersion**: version of object configuration ",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "apiVersion": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "objVersion": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "apiVersion",
+                "objVersion"
+              ],
+              "x-examples": {
+                "example-1": {
+                  "apiVersion": "1.6",
+                  "objVersion": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "apiVersion": "1.6",
+                  "objVersion": 1
+                }
+              },
+              "example-2": {
+                "value": {
+                  "apiVersion": "3.4",
+                  "objVersion": 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_400": {
+        "description": "Bad request ",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Don't need ID"
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Don't need ID"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "Invalid ID"
+                }
+              },
+              "example-3": {
+                "value": {
+                  "Status": "Invalid json type",
+                  "GceError": {
+                    "group": "<group number>",
+                    "code": "<code number>"
+                  }
+                }
+              },
+              "example-4": {
+                "value": {
+                  "Status": "Invalid parameter",
+                  "GceError": {
+                    "group": "<group number>",
+                    "code": "<code number>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_401": {
+        "description": "Unauthorized request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Need AuthToken"
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Need AuthToken"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "Invalid AuthToken"
+                }
+              },
+              "example-3": {
+                "value": {
+                  "Status": "Unknown login"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_403": {
+        "description": "Forbiden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Need authorization elevation"
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Need authorization elevation"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "Resource not authorized"
+                }
+              },
+              "example-3": {
+                "value": {
+                  "Status": "Cannot deleted used resource"
+                }
+              },
+              "example-4": {
+                "value": {
+                  "Status": "Cannot modify reserved resource"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_404": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Unknown ID"
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Unknown ID"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "URI Not Found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_507": {
+        "description": "Out of memory",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "Status"
+              ],
+              "x-examples": {
+                "example-1": {
+                  "Status": "Unable to create object, collection is full"
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Unable to create object, collection is full"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "Unable to link object, list is full"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_500": {
+        "description": "Internal error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Failed to init api handler, out of memory",
+                  "GceError": {
+                    "group": "group number",
+                    "code": "code number"
+                  }
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "GceError": {
+                  "type": "object",
+                  "properties": {
+                    "group": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Failed to init api handler, out of memory",
+                  "GceError": {
+                    "group": "group number",
+                    "code": "code number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKey-Level_0": {
+        "name": "ApiKey",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"ApiKey\" created on system by an \"admin\" user and configured with Level 0 (Supervisor)."
+      },
+      "ApiKey-Level_1": {
+        "name": "ApiKey",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"ApiKey\" created on system by an \"admin\" user and configured with Level 1 (User)."
+      },
+      "AuthToken-Level_2": {
+        "name": "AuthToken",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"AuthToken\" obtained by Login with an user account of Level 2 (Operator). \n(cf. login procedure /api/auth/login/:login) "
+      },
+      "AuthToken-Level_3": {
+        "name": "AuthToken",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"AuthToken\" obtained by Login with an user account of Level 3 (Administrator). \n(cf. login procedure /api/auth/login/:login) "
+      },
+      "AuthToken-Level_4": {
+        "name": "AuthToken",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"AuthToken\" obtained by Login with an user account of Level 4 (Root). \n(cf. login procedure /api/auth/login/:login) "
+      }
+    },
+    "parameters": {
+      "option": {
+        "name": "option",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "filter_state",
+            "filter_config",
+            "filter_name"
+          ]
+        },
+        "description": "Filter the expected response (optional)"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "analog_unit"
+    },
+    {
+      "name": "core_analog"
+    },
+    {
+      "name": "core_io"
+    },
+    {
+      "name": "core_string"
+    }
+  ]
+}

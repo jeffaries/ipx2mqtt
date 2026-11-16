@@ -1,0 +1,50 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Lance le service avec les secrets/paramètres de .env (copier .env.example vers .env).
+      "name": "ipx2mqtt (avec .env)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/Ipx2Mqtt.Service/bin/Debug/net10.0/Ipx2Mqtt.Service.dll",
+      "cwd": "${workspaceFolder}/src/Ipx2Mqtt.Service",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
+      // Utilise uniquement appsettings.json (et vos variables d'environnement système).
+      "name": "ipx2mqtt (appsettings.json)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/Ipx2Mqtt.Service/bin/Debug/net10.0/Ipx2Mqtt.Service.dll",
+      "cwd": "${workspaceFolder}/src/Ipx2Mqtt.Service",
+      "env": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
+      // Avec logs Debug : chaque changement publié et chaque message IPX ignoré.
+      "name": "ipx2mqtt (logs Debug)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/Ipx2Mqtt.Service/bin/Debug/net10.0/Ipx2Mqtt.Service.dll",
+      "cwd": "${workspaceFolder}/src/Ipx2Mqtt.Service",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "Logging__LogLevel__Default": "Debug"
+      },
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    }
+  ]
+}

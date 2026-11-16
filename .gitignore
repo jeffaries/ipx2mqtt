@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResults/
+# Local configuration that may contain secrets
+appsettings.local.json
+appsettings.Production.json
+.env

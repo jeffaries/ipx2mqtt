@@ -1,0 +1,701 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "IPX 800 V5 API IPX",
+    "version": "1.0",
+    "contact": {
+      "email": "dev@gce-electronics.com",
+      "name": "GCE Electronics"
+    },
+    "description": "This is a document to describe IPX API requests to manage your IPX 800 V5."
+  },
+  "servers": [
+    {
+      "url": "http://192.168.1.84",
+      "description": "url"
+    }
+  ],
+  "paths": {
+    "/api/system/ipx": {
+      "get": {
+        "summary": "GET IPX",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ipx_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-system-ipx",
+        "description": " # IPX object description\nIPX object is composed of 8 outputs relays, 8 digital inputs and 4 analog inputs. You can pilot external devices or measure external sensors values.\n\n### Object internal configuration:\n* **_id**: Unique ID of object \n* **errorCode**: Error code according to object auto check: dependencies, configuration values, etc. (0 if OK) \n\n### Object dependencies:\n* **ioDInput**: Array of 8 states representing each digital input. (\"on\" or \"off\")\n* **ioRelays**: Set \"on\", \"off\" or \"toggle\" to control each relay output.\n* **ioRelayState**: Array of 8 states representing each relays output. (\"on\" or \"off\")\n* **ana_IPX_Input**: Array of 8 values representing each analog input.\n* **ioCollInput**: Array of 8 states representing each opto isolate input. (\"on\" or \"off\")\n* **ioCollOutput**: Set \"on\", \"off\" or \"toggle\" to control each open collector output.\n* **ioCollOutputState**: Array of 8 states representing each open collector output. (\"on\" or \"off\")\n* **ioIPXReset**: Set \"on\" or \"toggle\" to reset IPX.\n* **ioDetectionAC**: Value representing ac detection in XPSU (\"on\" or \"off\")\n",
+        "tags": [
+          "ipx"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "UPDATE IPX component",
+        "operationId": "put-api-system-ipx",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ipx_object"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "description": " ",
+        "tags": [
+          "ipx"
+        ],
+        "security": [
+          {
+            "AuthToken-Level_2": []
+          }
+        ]
+      }
+    },
+    "/api/system/ipx/info": {
+      "get": {
+        "summary": "GET IPX info",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/_info"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error_401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error_500"
+          }
+        },
+        "operationId": "get-api-system-ipx-info",
+        "description": "Get internal informations for IPX",
+        "parameters": [],
+        "tags": [
+          "ipx"
+        ],
+        "security": [
+          {
+            "ApiKey-Level_0": []
+          }
+        ]
+      },
+      "parameters": []
+    }
+  },
+  "components": {
+    "schemas": {
+      "object_ipx": {
+        "description": "",
+        "type": "object",
+        "x-examples": {
+          "example-1": {
+            "_id": 9437184,
+            "errorStatus": 0,
+            "ioDInput": [
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off"
+            ],
+            "ioRelays": [
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off"
+            ],
+            "ioRelayState": [
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off",
+              "off"
+            ],
+            "ana_IPX_Input": [
+              0,
+              27571,
+              43862,
+              46838
+            ],
+            "ioCollInput": [
+              "off",
+              "off",
+              "off",
+              "off"
+            ],
+            "ioCollOutput": [
+              "off",
+              "off",
+              "off",
+              "off"
+            ],
+            "ioCollOutputState": [
+              "off",
+              "off",
+              "off",
+              "off"
+            ],
+            "ioIPXReset": "off",
+            "ioLexanSelBP": "off",
+            "anaIPXChargePeriod": 0,
+            "anaIPXChargeApp": 0,
+            "anaIPXChargeRules": 0,
+            "anaIPXChargeEbx": 0,
+            "anaIPXChargeBsp": 0,
+            "anaIPXCyclePeriod": 30,
+            "anaIPXCycleApp": 0,
+            "anaIPXCycleRules": 0,
+            "anaIPXCycleEBX": 0,
+            "anaIPXCycleBSP": 8,
+            "anaHeapFree": 182560,
+            "anaDeltaHeapFree": 0,
+            "anaMonitorConnections": 0,
+            "anaIPXClock_id": 1634121258,
+            "ioDetectionAC": "off"
+          }
+        },
+        "title": "IPX",
+        "properties": {
+          "_id": {
+            "type": "number"
+          },
+          "errorStatus": {
+            "type": "number"
+          },
+          "ioDInput": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ioRelays": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ioRelayState": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ana_IPX_Input": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "ioCollInput": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ioCollOutput": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ioCollOutputState": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ioIPXReset": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ioLexanSelBP": {
+            "type": "string",
+            "minLength": 1
+          },
+          "anaIPXChargePeriod": {
+            "type": "number"
+          },
+          "anaIPXChargeApp": {
+            "type": "number"
+          },
+          "anaIPXChargeRules": {
+            "type": "number"
+          },
+          "anaIPXChargeEbx": {
+            "type": "number"
+          },
+          "anaIPXChargeBsp": {
+            "type": "number"
+          },
+          "anaIPXCyclePeriod": {
+            "type": "number"
+          },
+          "anaIPXCycleApp": {
+            "type": "number"
+          },
+          "anaIPXCycleRules": {
+            "type": "number"
+          },
+          "anaIPXCycleEBX": {
+            "type": "number"
+          },
+          "anaIPXCycleBSP": {
+            "type": "number"
+          },
+          "anaHeapFree": {
+            "type": "number"
+          },
+          "anaDeltaHeapFree": {
+            "type": "number"
+          },
+          "anaMonitorConnections": {
+            "type": "number"
+          },
+          "anaIPXClock_id": {
+            "type": "number"
+          },
+          "ioDetectionAC": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKey-Level_0": {
+        "name": "ApiKey",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"ApiKey\" created on system by an \"admin\" user and configured with Level 0 (Supervisor)."
+      },
+      "ApiKey-Level_1": {
+        "name": "ApiKey",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"ApiKey\" created on system by an \"admin\" user and configured with Level 1 (User)."
+      },
+      "AuthToken-Level_2": {
+        "name": "AuthToken",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"AuthToken\" obtained by Login with an user account of Level 2 (Operator). \n(cf. login procedure /api/auth/login/:login) "
+      },
+      "AuthToken-Level_3": {
+        "name": "AuthToken",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"AuthToken\" obtained by Login with an user account of Level 3 (Administrator). \n(cf. login procedure /api/auth/login/:login) "
+      },
+      "AuthToken-Level_4": {
+        "name": "AuthToken",
+        "type": "apiKey",
+        "in": "query",
+        "description": "An \"AuthToken\" obtained by Login with an user account of Level 4 (Root). \n(cf. login procedure /api/auth/login/:login) "
+      }
+    },
+    "responses": {
+      "_info": {
+        "description": "Informations about a collection object :\n* **apiVersion**: version of object API\n* **objVersion**: version of object configuration ",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "apiVersion": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "objVersion": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "apiVersion",
+                "objVersion"
+              ],
+              "x-examples": {
+                "example-1": {
+                  "apiVersion": "1.6",
+                  "objVersion": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "apiVersion": "1.6",
+                  "objVersion": 1
+                }
+              },
+              "example-2": {
+                "value": {
+                  "apiVersion": "3.4",
+                  "objVersion": 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "ipx_object": {
+        "description": "Return IPX object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/object_ipx"
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "_id": 9437184,
+                  "errorStatus": 0,
+                  "ioDInput": [
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off"
+                  ],
+                  "ioRelays": [
+                    "on",
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off"
+                  ],
+                  "ioRelayState": [
+                    "on",
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off",
+                    "off"
+                  ],
+                  "ana_IPX_Input": [
+                    2,
+                    5,
+                    6,
+                    10
+                  ],
+                  "ioCollInput": [
+                    "off",
+                    "off",
+                    "off",
+                    "off"
+                  ],
+                  "ioCollOutput": [
+                    "off",
+                    "off",
+                    "off",
+                    "off"
+                  ],
+                  "ioCollOutputState": [
+                    "off",
+                    "off",
+                    "off",
+                    "off"
+                  ],
+                  "ioIPXReset": "off",
+                  "ioLexanSelBP": "off",
+                  "ioLexanStatusLED": "off",
+                  "anaIPXChargePeriod": 2,
+                  "anaIPXChargeApp": 0,
+                  "anaIPXChargeRules": 0,
+                  "anaIPXChargeEbx": 0,
+                  "anaIPXChargeBsp": 0,
+                  "anaIPXCyclePeriod": 255,
+                  "anaIPXCycleApp": 0,
+                  "anaIPXCycleRules": 0,
+                  "anaIPXCycleEBX": 0,
+                  "anaIPXCycleBSP": 6,
+                  "anaHeapFree": 177440,
+                  "anaDeltaHeapFree": 3016,
+                  "anaMonitorConnections": 0,
+                  "anaIPXClock_id": 1632302821,
+                  "ioDetectionAC": "off"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_400": {
+        "description": "Bad request ",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Don't need ID"
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Don't need ID"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "Invalid ID"
+                }
+              },
+              "example-3": {
+                "value": {
+                  "Status": "Invalid json type",
+                  "GceError": {
+                    "group": "<group number>",
+                    "code": "<code number>"
+                  }
+                }
+              },
+              "example-4": {
+                "value": {
+                  "Status": "Invalid parameter",
+                  "GceError": {
+                    "group": "<group number>",
+                    "code": "<code number>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_401": {
+        "description": "Unauthorized request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Need AuthToken"
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Need AuthToken"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "Invalid AuthToken"
+                }
+              },
+              "example-3": {
+                "value": {
+                  "Status": "Unknown login"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_403": {
+        "description": "Forbiden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Need authorization elevation"
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Need authorization elevation"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "Resource not authorized"
+                }
+              },
+              "example-3": {
+                "value": {
+                  "Status": "Cannot deleted used resource"
+                }
+              },
+              "example-4": {
+                "value": {
+                  "Status": "Cannot modify reserved resource"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_404": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Unknown ID"
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Unknown ID"
+                }
+              },
+              "example-2": {
+                "value": {
+                  "Status": "URI Not Found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error_500": {
+        "description": "Internal error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "",
+              "type": "object",
+              "x-examples": {
+                "example-1": {
+                  "Status": "Failed to init api handler, out of memory",
+                  "GceError": {
+                    "group": "group number",
+                    "code": "code number"
+                  }
+                }
+              },
+              "properties": {
+                "Status": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "GceError": {
+                  "type": "object",
+                  "properties": {
+                    "group": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            },
+            "examples": {
+              "example-1": {
+                "value": {
+                  "Status": "Failed to init api handler, out of memory",
+                  "GceError": {
+                    "group": "group number",
+                    "code": "code number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "ipx"
+    }
+  ]
+}
