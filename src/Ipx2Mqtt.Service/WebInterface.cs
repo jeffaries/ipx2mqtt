@@ -39,6 +39,8 @@ public static class WebInterface
         app.UseDefaultFiles();
         app.UseStaticFiles();
 
+        app.MapHub<MonitorHub>("/hubs/monitor");
+
         app.MapGet("/api/config", (ConfigEditor editor) => Results.Json(editor.Read()));
 
         app.MapPut("/api/config", (JsonObject body, ConfigEditor editor) =>

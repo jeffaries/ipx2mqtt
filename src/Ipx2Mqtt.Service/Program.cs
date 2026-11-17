@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Ipx2Mqtt.Core;
+using Ipx2Mqtt.Core.Mqtt;
 using Ipx2Mqtt.Ipx;
 using Ipx2Mqtt.Service;
 using Microsoft.Extensions.Options;
@@ -21,6 +22,12 @@ builder.Services.AddSingleton(new ConfigEditor(configDirectory ?? ExternalConfig
 
 builder.Services.AddIpx2MqttCore(builder.Configuration);
 builder.Services.AddIpx(builder.Configuration);
+
+// Live monitor (web interface): every MQTT message goes through the decorator, IPX events through the BridgeWorker.
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<MonitorStream>();
+builder.Services.AddSingleton<IMqttPublisher>(sp =>
+    new MonitoredMqttPublisher(sp.GetRequiredService<MqttConnection>(), sp.GetRequiredService<MonitorStream>()));
 
 // Start order: MQTT, bridge, IPX. Stop order is the reverse, so "offline" is published before MQTT disconnects.
 builder.Services.AddHostedService<MqttWorker>();

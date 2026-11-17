@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useLocale } from 'vuetify'
 import { sections, componentTypes, getPath, setPath, prune } from './schema'
 import EntityDialog from './EntityDialog.vue'
+import Monitor from './Monitor.vue'
 import { languages, locale, setLocale, t, tOrNull } from './i18n'
 
 const vuetifyLocale = useLocale()
@@ -169,7 +170,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', warnUnload))
     </v-app-bar>
 
     <v-main>
-      <v-container style="max-width: 1100px">
+      <v-container :style="{ maxWidth: tab === 'monitor' ? '1600px' : '1100px' }">
         <v-progress-linear v-if="loading" indeterminate />
 
         <v-alert v-if="!loading && !directory" type="warning" class="mb-4" variant="tonal">
@@ -189,6 +190,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', warnUnload))
             {{ t('s.entities') }}
             <v-chip size="x-small" class="ml-2">{{ entities.length }}</v-chip>
           </v-tab>
+          <v-tab value="monitor" prepend-icon="mdi-pulse">{{ t('s.monitor') }}</v-tab>
         </v-tabs>
         <v-divider class="mb-4" />
 
@@ -233,17 +235,17 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', warnUnload))
             <v-card variant="outlined">
               <v-card-text>
                 <v-row align="center">
-                  <v-col cols="12" md="5">
+                  <v-col cols="12" md="4">
                     <v-text-field v-model="search" :label="t('e.search')" prepend-inner-icon="mdi-magnify" clearable hide-details />
                   </v-col>
-                  <v-col cols="12" md="4">
+                  <v-col cols="12" md="auto">
                     <v-btn-toggle v-model="kindFilter" mandatory color="primary" density="comfortable" variant="outlined" divided>
                       <v-btn value="all">{{ t('e.all') }}</v-btn>
                       <v-btn value="custom">{{ t('e.custom') }}</v-btn>
                       <v-btn value="manual">{{ t('e.manual') }}</v-btn>
                     </v-btn-toggle>
                   </v-col>
-                  <v-col cols="12" md="3" class="text-md-end">
+                  <v-col cols="12" md="auto" class="ml-md-auto">
                     <v-menu>
                       <template #activator="{ props }">
                         <v-btn v-bind="props" color="primary" prepend-icon="mdi-plus">{{ t('e.add') }}</v-btn>
@@ -273,6 +275,9 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', warnUnload))
             <div class="text-caption text-medium-emphasis mt-2">
               {{ t('e.componentNote') }}
             </div>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="monitor">
+            <monitor />
           </v-tabs-window-item>
         </v-tabs-window>
       </v-container>

@@ -35,6 +35,7 @@ public sealed class BridgeWorker : BackgroundService
     private readonly EntityRegistry _registry;
     private readonly DeviceOptions _device;
     private readonly ILogger<BridgeWorker> _logger;
+    private readonly MonitorStream? _monitor;
     private readonly Channel<BridgeEvent> _events = Channel.CreateUnbounded<BridgeEvent>(new UnboundedChannelOptions { SingleReader = true });
     private readonly string _version =
         Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion?.Split('+')[0] ?? "0.0.0";
@@ -49,7 +50,8 @@ public sealed class BridgeWorker : BackgroundService
         StatePublisher states,
         EntityRegistry registry,
         IOptions<DeviceOptions> device,
-        ILogger<BridgeWorker> logger)
+        ILogger<BridgeWorker> logger,
+        MonitorStream? monitor = null)
     {
         _ipx = ipx;
         _push = push;
@@ -61,6 +63,7 @@ public sealed class BridgeWorker : BackgroundService
         _registry = registry;
         _device = device.Value;
         _logger = logger;
+        _monitor = monitor;
 
         // Wired in the constructor (not in ExecuteAsync): ExecuteAsync may start after the other hosted services
         // have already produced events, and those must not be lost.
@@ -89,8 +92,9 @@ public sealed class BridgeWorker : BackgroundService
     private void OnIpxState(IpxStateChange change)
     {
         // The IPX publishes many objects we do not expose (clock, diagnostics): drop them early.
-        if (_registry.StatesById.ContainsKey(change.Id))
+        if (_registry.StatesById.TryGetValue(change.Id, out var bindings))
         {
+            _monitor?.Publish(MonitorKinds.IpxState, topic: bindings[0].Topic, ipxId: change.Id, payload: change.Value);
             Post(new StateEvent(change));
         }
     }
@@ -160,10 +164,12 @@ public sealed class BridgeWorker : BackgroundService
                 break;
 
             case AvailabilityEvent a:
+                _monitor?.Publish(MonitorKinds.System, detail: a.Online ? "IPX online" : "IPX offline");
                 await _availability.SetAsync(a.Online, ct).ConfigureAwait(false);
                 break;
 
             case MqttConnectedEvent:
+                _monitor?.Publish(MonitorKinds.System, detail: "MQTT connected");
                 // The broker may have lost its retained messages: send everything again.
                 await _discovery.RepublishCurrentAsync(ct).ConfigureAwait(false);
                 await _availability.PublishCurrentAsync(ct).ConfigureAwait(false);
@@ -189,10 +195,12 @@ public sealed class BridgeWorker : BackgroundService
         try
         {
             await _ipx.SetAsync(command.Id, command.Value, CancellationToken.None).ConfigureAwait(false);
+            _monitor?.Publish(MonitorKinds.IpxCommand, topic: topic, ipxId: command.Id, payload: command.Value, ok: true);
             _logger.LogInformation("Command sent to IPX object {Id}: {Value} (from {Topic})", command.Id, command.Value, topic);
         }
         catch (Exception ex)
         {
+            _monitor?.Publish(MonitorKinds.IpxCommand, topic: topic, ipxId: command.Id, payload: command.Value, ok: false, detail: ex.Message);
             _logger.LogError(ex, "Command to IPX object {Id} failed (from {Topic})", command.Id, topic);
         }
     }

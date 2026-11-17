@@ -356,6 +356,9 @@ discovered channels, hand-declared entities).
   [templates](config/entities.example.yml) as documentation). Keys unknown to the form are kept.
 - Writing needs the `/config` folder to be writable by the container user (`$APP_UID`, 1654 on the .NET images):
   `chown 1654 /data/ipx2mqtt` or similar.
+- **Monitor** tab: live view (SignalR, hub `/hubs/monitor`) of what goes through the bridge: IPX state changes, commands
+  sent to the IPX, MQTT messages published and received, availability. Filter by IPX / MQTT / system, text filter, pause,
+  clear; the last 500 events are replayed when the page opens. Nothing is stored on disk.
 - Development: `cd web && npm install && npm run dev` (proxies `/api` to a service running on port 8080), or
   `npm run build` to produce `src/Ipx2Mqtt.Service/wwwroot` (ignored by git; the Dockerfile builds it).
 

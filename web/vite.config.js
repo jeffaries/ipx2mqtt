@@ -7,5 +7,5 @@ export default defineConfig({
   plugins: [vue(), vuetify({ autoImport: true })],
   build: { outDir: '../src/Ipx2Mqtt.Service/wwwroot', emptyOutDir: true },
   // `npm run dev`: proxy the API to a locally running service (dotnet run, Web.Port 8080)
-  server: { proxy: { '/api': 'http://localhost:8080' } },
+  server: { proxy: { '/api': 'http://localhost:8080', '/hubs': { target: 'http://localhost:8080', ws: true } } },
 })
