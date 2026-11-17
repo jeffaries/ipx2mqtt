@@ -42,15 +42,22 @@ public static class ExternalConfig
         return null;
     }
 
+    /// <summary>Folder the web interface writes to when no configuration file exists yet: the Docker volume, if mounted.</summary>
+    public static string? DefaultWritableDirectory()
+    {
+        var docker = Path.Combine(Path.DirectorySeparatorChar.ToString(), "config");
+        return Directory.Exists(docker) ? docker : null;
+    }
+
     private static bool HasConfigFile(string directory) =>
         FileNames.Any(name => File.Exists(Path.Combine(directory, name)));
 
-    public static void AddTo(ConfigurationManager configuration, string[] args)
+    public static string? AddTo(ConfigurationManager configuration, string[] args)
     {
         var directory = LocateDirectory(Environment.GetEnvironmentVariable(EnvironmentVariable));
         if (directory is null)
         {
-            return;
+            return null;
         }
 
         foreach (var name in FileNames)
@@ -66,5 +73,6 @@ public static class ExternalConfig
         // Restore the usual precedence: environment variables and command line win over any file.
         configuration.AddEnvironmentVariables();
         configuration.AddCommandLine(args);
+        return directory;
     }
 }

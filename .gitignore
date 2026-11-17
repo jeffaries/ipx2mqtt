@@ -12,3 +12,6 @@ appsettings.Production.json
 # Real configuration (passwords): copy config/config.example.yml to config/config.yml
 config/config.yml
 config/entities.yml
+# Web interface
+web/node_modules/
+src/Ipx2Mqtt.Service/wwwroot/

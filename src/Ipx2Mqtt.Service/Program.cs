@@ -6,11 +6,18 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// The HTTP server only exists for the optional IPX "Push" endpoint; when disabled it listens on a random loopback port.
-var pushOptions = builder.Configuration.GetSection(PushOptions.SectionName).Get<PushOptions>() ?? new PushOptions();
-builder.WebHost.UseUrls(pushOptions.Enabled ? $"http://0.0.0.0:{pushOptions.Port}" : "http://127.0.0.1:0");
+var configDirectory = ExternalConfig.AddTo(builder.Configuration, args);
 
-ExternalConfig.AddTo(builder.Configuration, args);
+// The HTTP server serves the web interface (Web.Port) and the optional IPX "Push" endpoint (Push.Port).
+// When both are disabled it listens on a random loopback port.
+var pushOptions = builder.Configuration.GetSection(PushOptions.SectionName).Get<PushOptions>() ?? new PushOptions();
+var webOptions = builder.Configuration.GetSection(WebOptions.SectionName).Get<WebOptions>() ?? new WebOptions();
+var ports = new List<int>();
+if (webOptions.Enabled) ports.Add(webOptions.Port);
+if (pushOptions.Enabled && !ports.Contains(pushOptions.Port)) ports.Add(pushOptions.Port);
+builder.WebHost.UseUrls(ports.Count > 0 ? ports.Select(p => $"http://0.0.0.0:{p}").ToArray() : new[] { "http://127.0.0.1:0" });
+
+builder.Services.AddSingleton(new ConfigEditor(configDirectory ?? ExternalConfig.DefaultWritableDirectory()));
 
 builder.Services.AddIpx2MqttCore(builder.Configuration);
 builder.Services.AddIpx(builder.Configuration);
@@ -21,6 +28,11 @@ builder.Services.AddHostedService<BridgeWorker>();
 builder.Services.AddHostedService<IpxWorker>();
 
 var app = builder.Build();
+
+if (webOptions.Enabled)
+{
+    app.UseWebInterface(webOptions, pushOptions);
+}
 
 if (pushOptions.Enabled)
 {

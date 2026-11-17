@@ -6,3 +6,5 @@
 *.md
 docker-compose.yml
 Dockerfile
+**/node_modules/
+src/Ipx2Mqtt.Service/wwwroot/

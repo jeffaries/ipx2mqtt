@@ -11,9 +11,10 @@ services:
     container_name: ipx2mqtt
     restart: unless-stopped
     volumes:
-      # Toute la configuration : ./config/config.yml (MQTT, IPX, appareil) et ./config/entities.yml (entités, libellés)
-      - /data/ipx2mqtt:/config:ro
-    # ports:
-    #   - "8080:8080"   # uniquement si Push.Enabled=true dans config.yml
+      # Toute la configuration : config.yml (MQTT, IPX, appareil) et entities.yml (entités, libellés).
+      # Pas en :ro : l'interface web les modifie (le dossier doit être accessible en écriture à l'utilisateur du conteneur).
+      - /data/ipx2mqtt:/config
+    ports:
+      - "8080:8080"   # interface web de configuration (Web.Port ; protégez-la avec Web.Password dans config.yml)
 
  

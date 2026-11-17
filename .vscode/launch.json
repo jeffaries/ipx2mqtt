@@ -6,12 +6,18 @@
       "name": "ipx2mqtt (avec .env)",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build",
+      "preLaunchTask": "build all",
       "program": "${workspaceFolder}/src/Ipx2Mqtt.Service/bin/Debug/net10.0/Ipx2Mqtt.Service.dll",
       "cwd": "${workspaceFolder}/src/Ipx2Mqtt.Service",
       "envFile": "${workspaceFolder}/.env",
       "env": {
         "DOTNET_ENVIRONMENT": "Development"
+      },
+      "serverReadyAction": {
+        // Ouvre l'interface web de configuration dès que le serveur écoute
+        "action": "openExternally",
+        "pattern": "Now listening on: http://[^:]+:(\\d+)",
+        "uriFormat": "http://localhost:%s"
       },
       "console": "integratedTerminal",
       "stopAtEntry": false
@@ -21,11 +27,17 @@
       "name": "ipx2mqtt (appsettings.json)",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build",
+      "preLaunchTask": "build all",
       "program": "${workspaceFolder}/src/Ipx2Mqtt.Service/bin/Debug/net10.0/Ipx2Mqtt.Service.dll",
       "cwd": "${workspaceFolder}/src/Ipx2Mqtt.Service",
       "env": {
         "DOTNET_ENVIRONMENT": "Development"
+      },
+      "serverReadyAction": {
+        // Ouvre l'interface web de configuration dès que le serveur écoute
+        "action": "openExternally",
+        "pattern": "Now listening on: http://[^:]+:(\\d+)",
+        "uriFormat": "http://localhost:%s"
       },
       "console": "integratedTerminal",
       "stopAtEntry": false
@@ -35,13 +47,19 @@
       "name": "ipx2mqtt (logs Debug)",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build",
+      "preLaunchTask": "build all",
       "program": "${workspaceFolder}/src/Ipx2Mqtt.Service/bin/Debug/net10.0/Ipx2Mqtt.Service.dll",
       "cwd": "${workspaceFolder}/src/Ipx2Mqtt.Service",
       "envFile": "${workspaceFolder}/.env",
       "env": {
         "DOTNET_ENVIRONMENT": "Development",
         "Logging__LogLevel__Default": "Debug"
+      },
+      "serverReadyAction": {
+        // Ouvre l'interface web de configuration dès que le serveur écoute
+        "action": "openExternally",
+        "pattern": "Now listening on: http://[^:]+:(\\d+)",
+        "uriFormat": "http://localhost:%s"
       },
       "console": "integratedTerminal",
       "stopAtEntry": false

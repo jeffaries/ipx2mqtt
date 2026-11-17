@@ -115,8 +115,9 @@ All the configuration lives in **two YAML files**, outside the application, in t
 | [config/config.yml](config/config.yml) | `Mqtt`, `Discovery`, `Device`, `Ipx`, `Push` (table below). Template: [config/config.example.yml](config/config.example.yml); the real file is ignored by git |
 | [config/entities.yml](config/entities.yml) | `Entities` (customisation of discovered entities, and hand-declared entities). Documented template: [config/entities.example.yml](config/entities.example.yml) |
 
-**Docker**: the folder is mounted read-only on `/config` (`./config:/config:ro` in
-[docker-compose.yml](docker-compose.yml), which contains no environment variable). The service reads
+**Docker**: the folder is mounted on `/config` (`./config:/config` in
+[docker-compose.yml](docker-compose.yml), which contains no environment variable). It must be writable by the
+container user if you edit the files from the [web interface](#web-interface). The service reads
 `config.yml` and `entities.yml` from there. Outside Docker it looks for the folder, first match wins: the
 `IPX2MQTT_CONFIG_DIR` environment variable, `/config`, then `config/` in the current directory or one of its
 parents (F5 in VS Code). The startup log says "Configuration loaded from …". Restart the service after a change.
@@ -337,6 +338,27 @@ Any configuration key is overridden with `Section__Key` (two underscores). Lists
 | `IPX2MQTT_CONFIG_DIR` | folder holding `config.yml` and `entities.yml` |
 | `Logging__LogLevel__Default` | `Debug` to see every ignored message and every change |
 
+## Web interface
+
+The image embeds a configuration interface (Vue + Vuetify, built in the Dockerfile) that edits `config.yml` and
+`entities.yml`: MQTT / Home Assistant, IPX800 connection, HTTP services, and the entity list (customisation of
+discovered channels, hand-declared entities).
+
+- The interface is available in French, English, Spanish, Italian and German (selector at the top right; the choice is remembered in the browser, default: browser language). Texts live in `web/src/locales/`.
+- Open `http://<host>:8080` (`Web.Port`, published by [docker-compose.yml](docker-compose.yml)). Disable it with `Web.Enabled: false`.
+- **Protect it**: set `Web.Password` (HTTP Basic, user `Web.Username`, default `admin`) in `config.yml`. The interface
+  never sends stored passwords to the browser (shown as `********`; left unchanged they keep their value), but without a
+  password anyone who reaches the port can change the configuration. Do not expose it to the Internet.
+- **Save** validates the content, writes both files (the previous versions are kept as `config.yml.bak` /
+  `entities.yml.bak`) and offers to **restart** the service (the container needs `restart: unless-stopped`).
+  Changes only apply after the restart.
+- The files are rewritten from the form: comments are not preserved (use the `.bak` files or the
+  [templates](config/entities.example.yml) as documentation). Keys unknown to the form are kept.
+- Writing needs the `/config` folder to be writable by the container user (`$APP_UID`, 1654 on the .NET images):
+  `chown 1654 /data/ipx2mqtt` or similar.
+- Development: `cd web && npm install && npm run dev` (proxies `/api` to a service running on port 8080), or
+  `npm run build` to produce `src/Ipx2Mqtt.Service/wwwroot` (ignored by git; the Dockerfile builds it).
+
 ## IPX Push object (optional)
 
 The WebSocket is normally enough. The *push* endpoint is a **complementary source**: the IPX **Push** object
@@ -345,7 +367,7 @@ sends an HTTP request to the service whenever an object you associate with it ch
 > ⚠️ **Feature not validated on real hardware.** The exact format of the request sent by the Push object
 > depends on its configuration; the two forms below are the ones the service can read.
 
-1. Enable the endpoint: `Push.Enabled: true` and `Push.Port: 8080` in `config.yml` (publish the port in Docker) and,
+1. Enable the endpoint: `Push.Enabled: true` and `Push.Port: 8080` in `config.yml` (publish the port in Docker; if it differs from `Web.Port`, the web interface is not served on it) and,
    preferably, `Push.Token: <secret>`.
 2. On the IPX, create a **Push** object (*Objects → Push*):
    - **Address**: the IP address of the machine hosting ipx2mqtt, **port** `8080`, method `GET`.
@@ -407,7 +429,8 @@ a `.env` file (copy [.env.example](.env.example) to `.env`, ignored by git) for 
 ```
 src/Ipx2Mqtt.Core      MQTT, discovery, availability, state diffing  (independent of the IPX, reusable)
 src/Ipx2Mqtt.Ipx       IPX800 V5 client: WebSocket, REST, strategy, FakeIpxClient, entity mapping and discovery
-src/Ipx2Mqtt.Service   worker, push endpoint, configuration files, Program.cs
+src/Ipx2Mqtt.Service   worker, push endpoint, web interface API, configuration files, Program.cs
+web/                   web interface (Vue 3 + Vuetify, Vite)
 tests/Ipx2Mqtt.Tests   xUnit: discovery, mapping, state diffing, parsing, IPX client against a fake server
 ```
 

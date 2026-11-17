@@ -2,12 +2,48 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "web: install",
+      "type": "process",
+      "command": "npm",
+      "args": ["install", "--no-audit", "--no-fund"],
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "problemMatcher": []
+    },
+    {
+      // Compile l'interface Vue/Vuetify vers src/Ipx2Mqtt.Service/wwwroot
+      "label": "web: build",
+      "type": "process",
+      "command": "npm",
+      "args": ["run", "build"],
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "dependsOn": ["web: install"],
+      "problemMatcher": []
+    },
+    {
+      // Serveur Vite avec rechargement à chaud (proxy /api vers le service sur le port 8080)
+      "label": "web: dev (Vite)",
+      "type": "process",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "dependsOn": ["web: install"],
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "build all",
+      "dependsOn": ["web: build", "build"],
+      "dependsOrder": "sequence",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
       "label": "build",
       "type": "process",
       "command": "dotnet",
       "args": ["build", "${workspaceFolder}/src/Ipx2Mqtt.Service/Ipx2Mqtt.Service.csproj", "/property:GenerateFullPaths=true", "/consoleloggerparameters:NoSummary"],
       "problemMatcher": "$msCompile",
-      "group": { "kind": "build", "isDefault": true }
+      "group": "build"
     },
     {
       "label": "test",
