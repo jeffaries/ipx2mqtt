@@ -15,6 +15,6 @@ services:
       # Pas en :ro : l'interface web les modifie (le dossier doit être accessible en écriture à l'utilisateur du conteneur).
       - /data/ipx2mqtt:/config
     ports:
-      - "8080:8080"   # interface web de configuration (Web.Port ; protégez-la avec Web.Password dans config.yml)
+      - "${PUBLIC_PORT}:8080"   # interface web de configuration (Web.Port ; protégez-la avec Web.Password dans config.yml)
 
  
